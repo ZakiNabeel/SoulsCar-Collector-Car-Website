@@ -54,7 +54,7 @@ export const cars: Car[] = [
     model: "280 SL Pagoda",
     spec: "Inline-6 · Auto · 62,100 km",
     price: "PKR 3.20 Cr",
-    image: car2.replace ? car2 : car2,
+    image: car1,
     mileage: "62,100 km",
     engine: "2.8L Inline-6",
     transmission: "4-speed Automatic",

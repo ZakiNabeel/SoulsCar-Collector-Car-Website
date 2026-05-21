@@ -34,8 +34,7 @@ export function LinkButton({ to, variant = "filled", className = "", children }:
       ? "bg-foreground text-background hover:bg-accent"
       : "border border-foreground text-foreground hover:bg-foreground hover:text-background";
   return (
-    // @ts-expect-error — generic string path
-    <Link to={to} className={`${base} ${styles} ${className}`}>
+    <Link to={to as never} className={`${base} ${styles} ${className}`}>
       {children}
     </Link>
   );
