@@ -1,13 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { Car } from "@/lib/cars-data";
 
 export function CarCard({ car }: { car: Car }) {
   return (
-    <Link
-      to="/cars/$slug"
-      params={{ slug: car.slug }}
-      className="group block"
-    >
+    <Link href={`/cars/${car.slug}`} className="group block">
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
         <img
           src={car.image}

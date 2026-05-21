@@ -1,15 +1,13 @@
+"use client";
+
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "filled" | "outline";
 };
 
-export function Button({
-  variant = "filled",
-  className = "",
-  ...props
-}: ButtonProps) {
+export function Button({ variant = "filled", className = "", ...props }: ButtonProps) {
   const base =
     "inline-flex items-center justify-center px-7 h-12 text-sm tracking-wide transition-colors";
   const styles =
@@ -34,7 +32,7 @@ export function LinkButton({ to, variant = "filled", className = "", children }:
       ? "bg-foreground text-background hover:bg-accent"
       : "border border-foreground text-foreground hover:bg-foreground hover:text-background";
   return (
-    <Link to={to as never} className={`${base} ${styles} ${className}`}>
+    <Link href={to} className={`${base} ${styles} ${className}`}>
       {children}
     </Link>
   );

@@ -1,12 +1,3 @@
-import car1 from "@/assets/car-1.jpg";
-import car2 from "@/assets/car-2.jpg";
-import car3 from "@/assets/car-3.jpg";
-import car4 from "@/assets/car-4.jpg";
-import car5 from "@/assets/car-5.jpg";
-import part1 from "@/assets/part-1.jpg";
-import part2 from "@/assets/part-2.jpg";
-import part3 from "@/assets/part-3.jpg";
-
 export type Car = {
   slug: string;
   name: string;
@@ -35,7 +26,7 @@ export const cars: Car[] = [
     model: "911 T",
     spec: "Flat-6 · Manual · 78,400 km",
     price: "PKR 4.85 Cr",
-    image: car1,
+    image: "/assets/car-1.jpg",
     mileage: "78,400 km",
     engine: "2.4L Flat-6",
     transmission: "5-speed Manual",
@@ -54,7 +45,7 @@ export const cars: Car[] = [
     model: "280 SL Pagoda",
     spec: "Inline-6 · Auto · 62,100 km",
     price: "PKR 3.20 Cr",
-    image: car1,
+    image: "/assets/car-1.jpg",
     mileage: "62,100 km",
     engine: "2.8L Inline-6",
     transmission: "4-speed Automatic",
@@ -73,7 +64,7 @@ export const cars: Car[] = [
     model: "FJ40",
     spec: "Inline-6 · Manual · 112,000 km",
     price: "PKR 1.95 Cr",
-    image: car2,
+    image: "/assets/car-2.jpg",
     mileage: "112,000 km",
     engine: "4.2L Inline-6",
     transmission: "4-speed Manual",
@@ -92,7 +83,7 @@ export const cars: Car[] = [
     model: "Fairlady 1600",
     spec: "Inline-4 · Manual · 54,300 km",
     price: "PKR 1.10 Cr",
-    image: car3,
+    image: "/assets/car-3.jpg",
     mileage: "54,300 km",
     engine: "1.6L Inline-4",
     transmission: "4-speed Manual",
@@ -111,7 +102,7 @@ export const cars: Car[] = [
     model: "2002",
     spec: "Inline-4 · Manual · 96,800 km",
     price: "PKR 1.45 Cr",
-    image: car4,
+    image: "/assets/car-4.jpg",
     mileage: "96,800 km",
     engine: "2.0L Inline-4",
     transmission: "4-speed Manual",
@@ -130,7 +121,7 @@ export const cars: Car[] = [
     model: "E-Type Series II",
     spec: "Inline-6 · Manual · 71,200 km",
     price: "PKR 5.60 Cr",
-    image: car5,
+    image: "/assets/car-5.jpg",
     mileage: "71,200 km",
     engine: "4.2L Inline-6",
     transmission: "4-speed Manual",
@@ -153,10 +144,52 @@ export type Part = {
 };
 
 export const parts: Part[] = [
-  { slug: "fj40-hubcaps", name: "FJ40 Chrome Hubcaps (set of 4)", fits: "Toyota Land Cruiser FJ40", condition: "Restored", price: "PKR 85,000", image: part1 },
-  { slug: "911-headlight", name: "Early 911 Headlight Assembly", fits: "Porsche 911 (1965–73)", condition: "Used", price: "PKR 142,000", image: part2 },
-  { slug: "wood-steering-wheel", name: "Nardi-style Wood Steering Wheel", fits: "Universal", condition: "New", price: "PKR 38,500", image: part3 },
-  { slug: "2002-grille", name: "BMW 2002 Front Grille", fits: "BMW 2002 (1968–76)", condition: "Restored", price: "PKR 52,000", image: part1 },
-  { slug: "e-type-mirror", name: "E-Type Bullet Mirror (pair)", fits: "Jaguar E-Type", condition: "New", price: "PKR 24,800", image: part2 },
-  { slug: "pagoda-emblem", name: "Pagoda Hood Emblem", fits: "Mercedes 280 SL", condition: "Used", price: "PKR 18,000", image: part3 },
+  {
+    slug: "fj40-hubcaps",
+    name: "FJ40 Chrome Hubcaps (set of 4)",
+    fits: "Toyota Land Cruiser FJ40",
+    condition: "Restored",
+    price: "PKR 85,000",
+    image: "/assets/part-1.jpg",
+  },
+  {
+    slug: "911-headlight",
+    name: "Early 911 Headlight Assembly",
+    fits: "Porsche 911 (1965–73)",
+    condition: "Used",
+    price: "PKR 142,000",
+    image: "/assets/part-2.jpg",
+  },
+  {
+    slug: "wood-steering-wheel",
+    name: "Nardi-style Wood Steering Wheel",
+    fits: "Universal",
+    condition: "New",
+    price: "PKR 38,500",
+    image: "/assets/part-3.jpg",
+  },
+  {
+    slug: "2002-grille",
+    name: "BMW 2002 Front Grille",
+    fits: "BMW 2002 (1968–76)",
+    condition: "Restored",
+    price: "PKR 52,000",
+    image: "/assets/part-1.jpg",
+  },
+  {
+    slug: "e-type-mirror",
+    name: "E-Type Bullet Mirror (pair)",
+    fits: "Jaguar E-Type",
+    condition: "New",
+    price: "PKR 24,800",
+    image: "/assets/part-2.jpg",
+  },
+  {
+    slug: "pagoda-emblem",
+    name: "Pagoda Hood Emblem",
+    fits: "Mercedes 280 SL",
+    condition: "Used",
+    price: "PKR 18,000",
+    image: "/assets/part-3.jpg",
+  },
 ];

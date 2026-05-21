@@ -1,31 +1,34 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const nav = [
-  { to: "/cars", label: "Cars" },
-  { to: "/parts", label: "Parts" },
-  { to: "/sell", label: "Sell a Car" },
-  { to: "/about", label: "About" },
+  { href: "/cars", label: "Cars" },
+  { href: "/parts", label: "Parts" },
+  { href: "/sell", label: "Sell a Car" },
+  { href: "/about", label: "About" },
 ] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border">
       <div className="mx-auto max-w-7xl px-6 lg:px-10 h-16 flex items-center justify-between">
-        <Link to="/" className="font-serif text-2xl tracking-tight text-foreground">
+        <Link href="/" className="font-serif text-2xl tracking-tight text-foreground">
           SoulCars<span className="text-accent">.pk</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-10">
           {nav.map((n) => (
             <Link
-              key={n.to}
-              to={n.to}
-              className="text-sm text-foreground/70 hover:text-foreground"
-              activeProps={{ className: "text-sm text-foreground" }}
+              key={n.href}
+              href={n.href}
+              className={`text-sm ${pathname === n.href ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
             >
               {n.label}
             </Link>
@@ -44,7 +47,7 @@ export function SiteHeader() {
       {open && (
         <div className="fixed inset-0 z-50 bg-background flex flex-col">
           <div className="h-16 px-6 flex items-center justify-between border-b border-border">
-            <Link to="/" onClick={() => setOpen(false)} className="font-serif text-2xl">
+            <Link href="/" onClick={() => setOpen(false)} className="font-serif text-2xl">
               SoulCars<span className="text-accent">.pk</span>
             </Link>
             <button aria-label="Close menu" onClick={() => setOpen(false)}>
@@ -54,8 +57,8 @@ export function SiteHeader() {
           <nav className="flex-1 flex flex-col items-center justify-center gap-8">
             {nav.map((n) => (
               <Link
-                key={n.to}
-                to={n.to}
+                key={n.href}
+                href={n.href}
                 onClick={() => setOpen(false)}
                 className="font-serif text-3xl text-foreground"
               >

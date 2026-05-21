@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 
 export function SiteFooter() {
   return (
@@ -8,16 +8,36 @@ export function SiteFooter() {
           <div className="space-y-3">
             <div className="eyebrow">Marketplace</div>
             <ul className="space-y-2 text-foreground/70">
-              <li><Link to="/cars" className="hover:text-foreground">Cars</Link></li>
-              <li><Link to="/parts" className="hover:text-foreground">Parts</Link></li>
-              <li><Link to="/sell" className="hover:text-foreground">Sell a Car</Link></li>
+              <li>
+                <Link href="/cars" className="hover:text-foreground">
+                  Cars
+                </Link>
+              </li>
+              <li>
+                <Link href="/parts" className="hover:text-foreground">
+                  Parts
+                </Link>
+              </li>
+              <li>
+                <Link href="/sell" className="hover:text-foreground">
+                  Sell a Car
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="space-y-3">
             <div className="eyebrow">Company</div>
             <ul className="space-y-2 text-foreground/70">
-              <li><Link to="/about" className="hover:text-foreground">About</Link></li>
-              <li><a href="mailto:hello@soulcars.pk" className="hover:text-foreground">Contact</a></li>
+              <li>
+                <Link href="/about" className="hover:text-foreground">
+                  About
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:hello@soulcars.pk" className="hover:text-foreground">
+                  Contact
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -26,7 +46,9 @@ export function SiteFooter() {
             Find the car you were meant to drive.
           </p>
           <p className="text-sm text-muted-foreground">hello@soulcars.pk · Lahore, Pakistan</p>
-          <p className="text-xs text-muted-foreground pt-6">© {new Date().getFullYear()} SoulCars.pk</p>
+          <p className="text-xs text-muted-foreground pt-6">
+            © {new Date().getFullYear()} SoulCars.pk
+          </p>
         </div>
       </div>
     </footer>

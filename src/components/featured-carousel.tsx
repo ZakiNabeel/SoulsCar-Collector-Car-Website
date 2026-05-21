@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { Car } from "@/lib/cars-data";
 
 export function FeaturedCarousel({ cars }: { cars: Car[] }) {
@@ -17,7 +19,7 @@ export function FeaturedCarousel({ cars }: { cars: Car[] }) {
         <div className="flex items-end justify-between mb-10">
           <div>
             <div className="eyebrow">Featured Listings</div>
-            <h2 className="mt-3 font-serif text-3xl md:text-4xl">This week's selection</h2>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl">This week&apos;s selection</h2>
           </div>
           <div className="hidden md:flex items-center gap-2">
             <button
@@ -44,8 +46,7 @@ export function FeaturedCarousel({ cars }: { cars: Car[] }) {
             return (
               <Link
                 key={`${off}-${car.slug}`}
-                to="/cars/$slug"
-                params={{ slug: car.slug }}
+                href={`/cars/${car.slug}`}
                 className={`group block bg-background transition-all ${
                   isCenter ? "" : "hidden md:block opacity-60 hover:opacity-100"
                 }`}
