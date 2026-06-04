@@ -5,6 +5,7 @@ import { SellClient } from "./_client";
 import { getContent } from "@/lib/sheets";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Sell Your Car — SoulCars.pk",

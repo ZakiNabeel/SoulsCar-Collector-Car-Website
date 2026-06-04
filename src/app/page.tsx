@@ -5,6 +5,7 @@ import { LinkButton } from "@/components/ui-bits";
 import { getCars, getContent } from "@/lib/sheets";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function Home() {
   const [cars, content] = await Promise.all([getCars(), getContent()]);

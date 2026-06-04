@@ -10,7 +10,7 @@ async function fetchSheet(range: string): Promise<string[][]> {
   if (!API_KEY || !SHEET_ID || SHEET_ID === "your_sheet_id_here") return [];
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
   try {
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       console.error(`Sheets API error: ${res.status}`, JSON.stringify(body, null, 2));

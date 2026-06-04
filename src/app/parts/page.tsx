@@ -5,6 +5,7 @@ import { PartsClient } from "./_client";
 import { getParts, getCars, getContent } from "@/lib/sheets";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Parts — SoulCars.pk",
