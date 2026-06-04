@@ -16,7 +16,10 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "@next/next/no-img-element": "off",
+      "@next/next/no-page-custom-font": "off",
+      "react/no-unescaped-entities": "off",
     },
   },
 ];
