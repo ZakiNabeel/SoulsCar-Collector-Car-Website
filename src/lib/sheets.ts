@@ -3,10 +3,9 @@ import type { Car, Part } from "./cars-data";
 // ─── Content type ────────────────────────────────────────────────────────────
 export type SiteContent = Record<string, Record<string, string>>;
 
-const API_KEY = process.env.GOOGLE_SHEETS_API_KEY!;
-const SHEET_ID = process.env.GOOGLE_SHEETS_SHEET_ID!;
-
 async function fetchSheet(range: string): Promise<string[][]> {
+  const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
+  const SHEET_ID = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!API_KEY || !SHEET_ID || SHEET_ID === "your_sheet_id_here") return [];
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
   try {
@@ -29,9 +28,9 @@ async function fetchSheet(range: string): Promise<string[][]> {
 // Returns all image URLs inside a given folder, sorted by created_at.
 // Falls back to [] if credentials are missing or the folder is empty.
 async function getCloudinaryImages(folder: string): Promise<string[]> {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
 
   if (!cloudName || !apiKey || !apiSecret || !folder.trim()) return [];
 
