@@ -63,7 +63,7 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
     const json = await res.json();
     // Inject Cloudinary transformations: auto quality, auto format, max width 1600px
     return (json.resources ?? []).map((r: { secure_url: string }) =>
-      r.secure_url.replace("/upload/", "/upload/q_auto,f_auto,w_1600,c_limit/")
+      r.secure_url.replace("/upload/", "/upload/q_auto,f_auto,w_1600,c_limit/"),
     );
   } catch (err) {
     console.error("Cloudinary fetch failed:", err);
@@ -77,7 +77,10 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
 // I mileage | J engine | K transmission | L color | M condition | N location
 // O description | P seller | Q images_folder (Cloudinary folder name)
 function toSlug(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export async function getCars(): Promise<Car[]> {
@@ -102,7 +105,7 @@ export async function getCars(): Promise<Car[]> {
         price: r[6] ?? "",
         image: r[7] ?? "",
         images: undefined as string[] | undefined,
-        imagesFolder: r[16]?.trim() ?? "",   // col Q — Cloudinary folder
+        imagesFolder: r[16]?.trim() ?? "", // col Q — Cloudinary folder
         mileage: r[8] ?? "",
         engine: r[9] ?? "",
         transmission: r[10] ?? "",

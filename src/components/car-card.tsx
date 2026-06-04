@@ -22,7 +22,8 @@ export function CarCard({ car }: { car: Car }) {
       <div className="pt-5 pb-2">
         <div className="flex items-baseline justify-between gap-4">
           <h3 className="font-serif text-xl text-foreground">
-            {car.year > 0 ? `${car.year} ` : ""}{car.name}
+            {car.year > 0 ? `${car.year} ` : ""}
+            {car.name}
           </h3>
           <span className="text-sm text-foreground whitespace-nowrap">{car.price}</span>
         </div>

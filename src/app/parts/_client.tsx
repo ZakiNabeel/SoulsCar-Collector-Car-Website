@@ -38,7 +38,9 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
         body: JSON.stringify({
           type: "part",
           itemName: part.name,
-          itemDetails: [part.fits && `Fits ${part.fits}`, part.condition, part.price].filter(Boolean).join(" · "),
+          itemDetails: [part.fits && `Fits ${part.fits}`, part.condition, part.price]
+            .filter(Boolean)
+            .join(" · "),
           name: form.name,
           phone: form.phone,
           email: form.email,
@@ -57,14 +59,19 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/40 backdrop-blur-sm">
       <div className="bg-background border border-border w-full max-w-md p-8 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+        >
           <X className="h-4 w-4" />
         </button>
         {sent ? (
           <div className="text-center space-y-3 py-4">
             <p className="font-serif text-2xl">Enquiry sent</p>
             <p className="text-sm text-muted-foreground">We'll be in touch shortly.</p>
-            <Button className="w-full mt-4" onClick={onClose}>Close</Button>
+            <Button className="w-full mt-4" onClick={onClose}>
+              Close
+            </Button>
           </div>
         ) : (
           <>
@@ -73,7 +80,9 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
             {part.fits && <p className="text-sm text-muted-foreground mb-6">Fits {part.fits}</p>}
             <form onSubmit={submit} className="space-y-4">
               <div>
-                <label className="text-xs text-muted-foreground tracking-wider uppercase">Your Name</label>
+                <label className="text-xs text-muted-foreground tracking-wider uppercase">
+                  Your Name
+                </label>
                 <input
                   required
                   value={form.name}
@@ -82,7 +91,9 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground tracking-wider uppercase">Phone / WhatsApp</label>
+                <label className="text-xs text-muted-foreground tracking-wider uppercase">
+                  Phone / WhatsApp
+                </label>
                 <input
                   required
                   value={form.phone}
@@ -91,7 +102,9 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground tracking-wider uppercase">Email (optional)</label>
+                <label className="text-xs text-muted-foreground tracking-wider uppercase">
+                  Email (optional)
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -100,7 +113,9 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground tracking-wider uppercase">Message (optional)</label>
+                <label className="text-xs text-muted-foreground tracking-wider uppercase">
+                  Message (optional)
+                </label>
                 <textarea
                   rows={3}
                   value={form.message}
@@ -150,7 +165,9 @@ function PartCard({ p }: { p: Part }) {
             )}
           </div>
           <div className="mt-4 flex gap-2">
-            <Button className="flex-1 text-xs py-2" onClick={() => setShowModal(true)}>Enquire</Button>
+            <Button className="flex-1 text-xs py-2" onClick={() => setShowModal(true)}>
+              Enquire
+            </Button>
             <Button variant="outline" className="flex-1 text-xs py-2" onClick={toggleSaved}>
               {saved ? "Saved ✓" : "Save"}
             </Button>
@@ -183,13 +200,18 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
   if (items.length === 0) return null;
 
   const get = (offset: number) => items[(i + offset + items.length) % items.length];
-  const goTo = (idx: number) => { setI(idx); startAutoPlay(); };
+  const goTo = (idx: number) => {
+    setI(idx);
+    startAutoPlay();
+  };
 
   const handleSideHover = (targetIdx: number) => {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     hoverTimerRef.current = setTimeout(() => goTo(targetIdx), 1500);
   };
-  const handleSideLeave = () => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current); };
+  const handleSideLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+  };
 
   return (
     <section className="bg-secondary py-20">
@@ -227,7 +249,9 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
                   </div>
                   <div className="p-5">
                     <div className="flex items-baseline justify-between gap-4">
-                      <h3 className="font-serif text-xl leading-snug">{car.year} {car.name}</h3>
+                      <h3 className="font-serif text-xl leading-snug">
+                        {car.year} {car.name}
+                      </h3>
                       <span className="text-sm whitespace-nowrap">{car.price}</span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
@@ -292,7 +316,9 @@ export function PartsClient({
       <section className="mx-auto max-w-7xl w-full px-6 lg:px-10 pt-16 pb-10">
         <div className="eyebrow">{c.eyebrow ?? "Marketplace"}</div>
         <h1 className="mt-3 font-serif text-4xl md:text-5xl">{c.heading ?? "Classic parts"}</h1>
-        <p className="mt-3 text-muted-foreground">{c.subtitle ?? "Restored, NOS and quality used components."}</p>
+        <p className="mt-3 text-muted-foreground">
+          {c.subtitle ?? "Restored, NOS and quality used components."}
+        </p>
       </section>
 
       <div className="border-y border-border">

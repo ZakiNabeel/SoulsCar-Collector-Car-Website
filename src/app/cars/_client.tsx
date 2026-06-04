@@ -5,7 +5,13 @@ import { CarCard } from "@/components/car-card";
 import { Pill } from "@/components/ui-bits";
 import type { Car } from "@/lib/cars-data";
 
-export function CarsClient({ cars, content = {} }: { cars: Car[]; content?: Record<string, string> }) {
+export function CarsClient({
+  cars,
+  content = {},
+}: {
+  cars: Car[];
+  content?: Record<string, string>;
+}) {
   const c = content;
   const makes = useMemo(
     () => ["All", ...Array.from(new Set(cars.map((c) => c.make))).sort()],

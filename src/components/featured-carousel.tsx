@@ -54,10 +54,11 @@ export function FeaturedCarousel({
   return (
     <section className="bg-secondary py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-
         <div className="mb-10">
           <div className="eyebrow">{eyebrow ?? "Featured Listings"}</div>
-          <h2 className="mt-3 font-serif text-3xl md:text-4xl">{heading ?? "This week's selection"}</h2>
+          <h2 className="mt-3 font-serif text-3xl md:text-4xl">
+            {heading ?? "This week's selection"}
+          </h2>
         </div>
 
         {/* Cards + centred nav buttons */}
@@ -89,7 +90,9 @@ export function FeaturedCarousel({
                   </div>
                   <div className="p-5">
                     <div className="flex items-baseline justify-between gap-4">
-                      <h3 className="font-serif text-xl leading-snug">{car.year} {car.name}</h3>
+                      <h3 className="font-serif text-xl leading-snug">
+                        {car.year} {car.name}
+                      </h3>
                       <span className="text-sm whitespace-nowrap">{car.price}</span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
@@ -115,7 +118,6 @@ export function FeaturedCarousel({
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
-
       </div>
     </section>
   );

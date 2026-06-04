@@ -51,11 +51,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <FeaturedCarousel
-        cars={cars}
-        eyebrow={c.carousel_eyebrow}
-        heading={c.carousel_heading}
-      />
+      <FeaturedCarousel cars={cars} eyebrow={c.carousel_eyebrow} heading={c.carousel_heading} />
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 py-24">

@@ -18,10 +18,10 @@ type Payload = {
 export async function POST(req: Request) {
   const data = (await req.json()) as Payload;
 
-  const heading = data.type === "car" ? "New Buy Request — SoulCars.pk" : "New Part Enquiry — SoulCars.pk";
-  const subject = data.type === "car"
-    ? `Buy Request: ${data.itemName}`
-    : `Part Enquiry: ${data.itemName}`;
+  const heading =
+    data.type === "car" ? "New Buy Request — SoulCars.pk" : "New Part Enquiry — SoulCars.pk";
+  const subject =
+    data.type === "car" ? `Buy Request: ${data.itemName}` : `Part Enquiry: ${data.itemName}`;
 
   const html = `
     <h2 style="font-family:serif;margin-bottom:24px">${heading}</h2>
