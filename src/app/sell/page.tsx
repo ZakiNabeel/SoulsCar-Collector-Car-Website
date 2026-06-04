@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SellClient } from "./_client";
 import { getContent } from "@/lib/sheets";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Sell Your Car — SoulCars.pk",
   description: "List your collector or vintage car on SoulCars.pk.",

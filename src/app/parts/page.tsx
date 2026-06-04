@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { PartsClient } from "./_client";
 import { getParts, getCars, getContent } from "@/lib/sheets";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Parts — SoulCars.pk",
   description: "Classic and vintage car parts for restoration projects in Pakistan.",

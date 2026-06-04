@@ -4,6 +4,8 @@ import { FeaturedCarousel } from "@/components/featured-carousel";
 import { LinkButton } from "@/components/ui-bits";
 import { getCars, getContent } from "@/lib/sheets";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [cars, content] = await Promise.all([getCars(), getContent()]);
   const c = content["home"] ?? {};

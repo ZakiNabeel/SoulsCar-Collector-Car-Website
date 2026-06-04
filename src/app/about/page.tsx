@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { LinkButton } from "@/components/ui-bits";
 import { getContent } from "@/lib/sheets";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "About — SoulCars.pk",
   description: "SoulCars.pk is a curated marketplace for collector cars in Pakistan.",
