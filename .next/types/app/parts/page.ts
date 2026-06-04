@@ -1,4 +1,4 @@
-// File: /home/sameer/Desktop/desk/soulcars-marketplace/src/app/parts/page.tsx
+// File: C:\Users\zakin\Documents\Souls Car\soulcars-marketplace\src\app\parts\page.tsx
 import * as entry from '../../../../src/app/parts/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

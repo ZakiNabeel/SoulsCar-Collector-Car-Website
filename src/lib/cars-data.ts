@@ -7,6 +7,8 @@ export type Car = {
   spec: string;
   price: string;
   image: string;
+  images?: string[];        // resolved Cloudinary image URLs for the gallery
+  imagesFolder?: string;    // Cloudinary folder name from col Q in the sheet
   mileage: string;
   engine: string;
   transmission: string;

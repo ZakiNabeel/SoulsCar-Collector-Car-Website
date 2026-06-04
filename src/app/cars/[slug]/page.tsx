@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { cars } from "@/lib/cars-data";
+import { getCarBySlug, getCars } from "@/lib/sheets";
 import { CarDetailClient } from "./_client";
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const car = cars.find((c) => c.slug === slug);
+  const car = await getCarBySlug(slug);
   if (!car) return {};
   return {
     title: `${car.year} ${car.name} — SoulCars.pk`,
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CarDetailPage({ params }: Props) {
   const { slug } = await params;
-  const car = cars.find((c) => c.slug === slug);
+  const [car, allCars] = await Promise.all([getCarBySlug(slug), getCars()]);
   if (!car) notFound();
-  return <CarDetailClient car={car} />;
+  return <CarDetailClient car={car} allCars={allCars} />;
 }
