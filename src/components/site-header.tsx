@@ -45,27 +45,47 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-background flex flex-col">
-          <div className="h-16 px-6 flex items-center justify-between border-b border-border">
-            <Link href="/" onClick={() => setOpen(false)} className="font-serif text-2xl">
-              SoulCars<span className="text-accent">.pk</span>
-            </Link>
-            <button aria-label="Close menu" onClick={() => setOpen(false)}>
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <nav className="flex-1 flex flex-col items-center justify-center gap-8">
-            {nav.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                onClick={() => setOpen(false)}
-                className="font-serif text-3xl text-foreground"
-              >
-                {n.label}
+        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex flex-col justify-end">
+          {/* Dismiss on background tap */}
+          <div className="absolute inset-0" onClick={() => setOpen(false)} />
+
+          {/* Card panel slides up from bottom */}
+          <div className="relative bg-background border-t border-border rounded-t-2xl px-6 pt-6 pb-12 shadow-2xl">
+            {/* Handle bar */}
+            <div className="w-10 h-1 bg-border rounded-full mx-auto mb-8" />
+
+            {/* Logo + close */}
+            <div className="flex items-center justify-between mb-8">
+              <Link href="/" onClick={() => setOpen(false)} className="font-serif text-2xl">
+                SoulCars<span className="text-accent">.pk</span>
               </Link>
-            ))}
-          </nav>
+              <button
+                aria-label="Close menu"
+                onClick={() => setOpen(false)}
+                className="h-9 w-9 grid place-items-center border border-border hover:bg-secondary transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav className="flex flex-col divide-y divide-border">
+              {nav.map((n) => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  onClick={() => setOpen(false)}
+                  className={`py-4 font-serif text-2xl transition-colors ${
+                    pathname === n.href
+                      ? "text-foreground"
+                      : "text-foreground/70 hover:text-foreground"
+                  }`}
+                >
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       )}
     </header>
