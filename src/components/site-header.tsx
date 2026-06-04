@@ -45,17 +45,21 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex flex-col justify-end">
+        <div className="md:hidden fixed inset-0 z-50 bg-black/50 flex flex-col justify-end">
           {/* Dismiss on background tap */}
-          <div className="absolute inset-0" onClick={() => setOpen(false)} />
+          <button
+            aria-label="Close menu"
+            className="absolute inset-0 w-full h-full cursor-default"
+            onClick={() => setOpen(false)}
+          />
 
           {/* Card panel slides up from bottom */}
           <div className="relative bg-background border-t border-border rounded-t-2xl px-6 pt-6 pb-12 shadow-2xl">
             {/* Handle bar */}
-            <div className="w-10 h-1 bg-border rounded-full mx-auto mb-8" />
+            <div className="w-10 h-1 bg-border rounded-full mx-auto mb-6" />
 
             {/* Logo + close */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-4">
               <Link href="/" onClick={() => setOpen(false)} className="font-serif text-2xl">
                 SoulCars<span className="text-accent">.pk</span>
               </Link>
@@ -75,10 +79,8 @@ export function SiteHeader() {
                   key={n.href}
                   href={n.href}
                   onClick={() => setOpen(false)}
-                  className={`py-4 font-serif text-2xl transition-colors ${
-                    pathname === n.href
-                      ? "text-foreground"
-                      : "text-foreground/70 hover:text-foreground"
+                  className={`py-4 font-serif text-2xl ${
+                    pathname === n.href ? "text-accent" : "text-foreground"
                   }`}
                 >
                   {n.label}
