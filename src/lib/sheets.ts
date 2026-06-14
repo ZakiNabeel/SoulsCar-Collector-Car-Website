@@ -70,6 +70,66 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
   }
 }
 
+// Returns only the FIRST image URL in a folder (sorted by created_at).
+// Used for browse-page thumbnails so we don't fetch full galleries per row.
+async function getCloudinaryThumbnail(folder: string): Promise<string> {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
+
+  if (!cloudName || !apiKey || !apiSecret || !folder.trim()) return "";
+
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Basic " + Buffer.from(`${apiKey}:${apiSecret}`).toString("base64"),
+      },
+      body: JSON.stringify({
+        expression: `folder=${folder.trim()}`,
+        sort_by: [{ created_at: "asc" }],
+        max_results: 1,
+        fields: ["secure_url"],
+      }),
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) {
+      console.error("Cloudinary thumbnail error:", res.status, await res.text());
+      return "";
+    }
+    const json = await res.json();
+    const first = json.resources?.[0]?.secure_url as string | undefined;
+    // Smaller transformation — these are grid thumbnails, not full-size.
+    return first ? first.replace("/upload/", "/upload/q_auto,f_auto,w_800,c_limit/") : "";
+  } catch (err) {
+    console.error("Cloudinary thumbnail fetch failed:", err);
+    return "";
+  }
+}
+
+// Resolves Cloudinary thumbnails for a list of items, in parallel, deduping
+// folder lookups so multiple rows sharing a folder only hit the API once.
+async function resolveThumbnails<T extends { image: string; imagesFolder?: string }>(
+  items: T[],
+): Promise<T[]> {
+  const folders = Array.from(
+    new Set(items.map((i) => i.imagesFolder?.trim()).filter((f): f is string => !!f)),
+  );
+  const entries = await Promise.all(
+    folders.map(async (f) => [f, await getCloudinaryThumbnail(f)] as const),
+  );
+  const thumbByFolder = new Map(entries);
+
+  return items.map((item) => {
+    const folder = item.imagesFolder?.trim();
+    const cloudThumb = folder ? thumbByFolder.get(folder) : "";
+    // Cloudinary first; fall back to the column-H Drive/URL link.
+    return { ...item, image: cloudThumb || item.image };
+  });
+}
+
 // ─── Cars ────────────────────────────────────────────────────────────────────
 // Sheet columns A–Q:
 // A slug | B name | C year | D make | E model | F spec | G price | H image
@@ -117,7 +177,8 @@ export async function getCars(): Promise<Car[]> {
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  return cars;
+  // Browse cards: prefer the first Cloudinary image, fall back to col H.
+  return resolveThumbnails(cars);
 }
 
 // For the detail page we also resolve Cloudinary images for that one car.
@@ -138,10 +199,12 @@ export async function getCarBySlug(slug: string): Promise<Car | undefined> {
 }
 
 // ─── Parts ───────────────────────────────────────────────────────────────────
-// slug | name | fits | condition | price | image
+// Sheet columns A–G:
+// A slug | B name | C fits | D condition | E price | F image
+// G images_folder (Cloudinary folder name)
 export async function getParts(): Promise<Part[]> {
-  const rows = await fetchSheet("Parts!A2:F");
-  return rows
+  const rows = await fetchSheet("Parts!A2:G");
+  const parts = rows
     .filter((r) => r[0])
     .map((r) => ({
       slug: r[0] ?? "",
@@ -150,7 +213,12 @@ export async function getParts(): Promise<Part[]> {
       condition: (r[3] as Part["condition"]) ?? "Used",
       price: r[4] ?? "",
       image: r[5] ?? "",
+      images: undefined as string[] | undefined,
+      imagesFolder: r[6]?.trim() ?? "", // col G — Cloudinary folder
     }));
+
+  // Browse cards: prefer the first Cloudinary image, fall back to col F.
+  return resolveThumbnails(parts);
 }
 
 // ─── Content ─────────────────────────────────────────────────────────────────

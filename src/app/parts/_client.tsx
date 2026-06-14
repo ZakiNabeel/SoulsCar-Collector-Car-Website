@@ -144,12 +144,14 @@ function PartCard({ p }: { p: Part }) {
       {showModal && <EnquireModal part={p} onClose={() => setShowModal(false)} />}
       <div className="group block">
         <div className="aspect-[16/10] overflow-hidden bg-secondary">
-          <img
-            src={p.image}
-            alt={p.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
-          />
+          {p.image && (
+            <img
+              src={p.image}
+              alt={p.name}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+            />
+          )}
         </div>
         <div className="pt-5">
           <div className="flex items-baseline justify-between gap-4">

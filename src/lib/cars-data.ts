@@ -143,6 +143,8 @@ export type Part = {
   condition: "New" | "Used" | "Restored";
   price: string;
   image: string;
+  images?: string[]; // resolved Cloudinary image URLs for a gallery
+  imagesFolder?: string; // Cloudinary folder name from col G in the Parts sheet
 };
 
 export const parts: Part[] = [
