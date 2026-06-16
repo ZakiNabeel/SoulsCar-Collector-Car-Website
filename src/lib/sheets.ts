@@ -210,7 +210,7 @@ export async function getCars(): Promise<Car[]> {
   const seen = new Set<string>();
 
   const cars = rows
-    .filter((r) => r[0] || r[1])
+    .filter((r) => r[1]?.trim())
     .map((r) => {
       const name = r[1] ?? "";
       const year = r[2] ?? "";
@@ -268,7 +268,7 @@ export async function getCarBySlug(slug: string): Promise<Car | undefined> {
 export async function getParts(): Promise<Part[]> {
   const rows = await fetchSheet("Parts!A2:G");
   const parts = rows
-    .filter((r) => r[0])
+    .filter((r) => r[1]?.trim())
     .map((r) => ({
       slug: r[0] ?? "",
       name: r[1] ?? "",
