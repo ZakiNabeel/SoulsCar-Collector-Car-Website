@@ -26,13 +26,17 @@ async function fetchSheet(range: string): Promise<string[][]> {
 // Sheet cells sometimes have the folder name typed with surrounding quotes
 // (e.g. `"C63 AMG"`); strip those so the literal quotes aren't sent to Cloudinary.
 function cleanFolderName(value: string | undefined): string {
-  return (value ?? "").trim().replace(/^"(.*)"$/, "$1").trim();
+  return (value ?? "")
+    .trim()
+    .replace(/^"(.*)"$/, "$1")
+    .trim();
 }
 
 // All car/part images live under this parent folder in Cloudinary. The sheet
 // only stores the subfolder name (e.g. "C63 AMG"), so we prepend this prefix
 // to build the full asset_folder path the Search API expects.
-const CLOUDINARY_PARENT_FOLDER = process.env.CLOUDINARY_PARENT_FOLDER?.trim() || "Website Inventory";
+const CLOUDINARY_PARENT_FOLDER =
+  process.env.CLOUDINARY_PARENT_FOLDER?.trim() || "Website Inventory";
 
 function fullFolderPath(folder: string): string {
   return `${CLOUDINARY_PARENT_FOLDER}/${folder}`;

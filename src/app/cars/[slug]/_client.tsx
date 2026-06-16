@@ -266,7 +266,11 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
           <div className="relative bg-secondary">
             <div className="aspect-[4/3] overflow-hidden bg-secondary">
               {gallery[imgIdx] && (
-                <img src={gallery[imgIdx]} alt={car.name} className="h-full w-full object-contain" />
+                <img
+                  src={gallery[imgIdx]}
+                  alt={car.name}
+                  className="h-full w-full object-contain"
+                />
               )}
             </div>
             {/* Prev / Next */}
