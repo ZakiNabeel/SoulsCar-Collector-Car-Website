@@ -266,7 +266,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
           <div className="relative bg-secondary">
             <div className="aspect-[4/3] overflow-hidden bg-secondary">
               {gallery[imgIdx] && (
-                <img src={gallery[imgIdx]} alt={car.name} className="h-full w-full object-cover" />
+                <img src={gallery[imgIdx]} alt={car.name} className="h-full w-full object-contain" />
               )}
             </div>
             {/* Prev / Next */}
@@ -315,8 +315,14 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             )}
           </div>
 
+          {/* Description — sits under the gallery, left column */}
+          <div className="mt-6 lg:order-3 lg:mt-0">
+            <div className="eyebrow mb-3">About this car</div>
+            <p className="text-lg text-muted-foreground leading-relaxed">{car.description}</p>
+          </div>
+
           {/* RIGHT — title, price, specs, actions */}
-          <div className="space-y-8">
+          <div className="space-y-8 lg:row-span-2">
             {/* Title */}
             <div>
               <div className="eyebrow">{car.location}</div>
@@ -359,12 +365,6 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
               </dl>
             </div>
           </div>
-        </div>
-
-        {/* ── Description — full width below ────────────────────────────── */}
-        <div className="mt-16 max-w-3xl">
-          <div className="eyebrow mb-3">About this car</div>
-          <p className="text-lg text-muted-foreground leading-relaxed">{car.description}</p>
         </div>
       </section>
 

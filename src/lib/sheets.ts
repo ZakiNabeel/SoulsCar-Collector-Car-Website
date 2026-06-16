@@ -23,6 +23,21 @@ async function fetchSheet(range: string): Promise<string[][]> {
   }
 }
 
+// Sheet cells sometimes have the folder name typed with surrounding quotes
+// (e.g. `"C63 AMG"`); strip those so the literal quotes aren't sent to Cloudinary.
+function cleanFolderName(value: string | undefined): string {
+  return (value ?? "").trim().replace(/^"(.*)"$/, "$1").trim();
+}
+
+// All car/part images live under this parent folder in Cloudinary. The sheet
+// only stores the subfolder name (e.g. "C63 AMG"), so we prepend this prefix
+// to build the full asset_folder path the Search API expects.
+const CLOUDINARY_PARENT_FOLDER = process.env.CLOUDINARY_PARENT_FOLDER?.trim() || "Website Inventory";
+
+function fullFolderPath(folder: string): string {
+  return `${CLOUDINARY_PARENT_FOLDER}/${folder}`;
+}
+
 // ─── Cloudinary folder → image URL list ──────────────────────────────────────
 // Uses the Cloudinary Admin API (search endpoint) with API Key + Secret.
 // Returns all image URLs inside a given folder, sorted by created_at.
@@ -34,8 +49,17 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
 
   if (!cloudName || !apiKey || !apiSecret || !folder.trim()) return [];
 
+  const folderName = fullFolderPath(folder.trim()).replace(/"/g, '\\"');
+  const expression = `folder="${folderName}"`;
+  console.log("Cloudinary gallery lookup", {
+    folder: folder.trim(),
+    cloudName,
+    hasApiKey: Boolean(apiKey),
+    hasApiSecret: Boolean(apiSecret),
+    expression,
+  });
+
   // Cloudinary Search API — finds all images in a folder
-  const expression = `folder=${folder.trim()}`;
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
 
   try {
@@ -55,11 +79,23 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
     });
 
     if (!res.ok) {
-      console.error("Cloudinary API error:", res.status, await res.text());
+      const body = await res.text();
+      console.error("Cloudinary gallery lookup failed", {
+        folder: folder.trim(),
+        status: res.status,
+        body,
+      });
+      if (res.status === 401 || res.status === 403) {
+        return [];
+      }
       return [];
     }
 
     const json = await res.json();
+    console.log("Cloudinary gallery lookup result", {
+      folder: folder.trim(),
+      count: json.resources?.length ?? 0,
+    });
     // Inject Cloudinary transformations: auto quality, auto format, max width 1600px
     return (json.resources ?? []).map((r: { secure_url: string }) =>
       r.secure_url.replace("/upload/", "/upload/q_auto,f_auto,w_1600,c_limit/"),
@@ -80,6 +116,17 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
   if (!cloudName || !apiKey || !apiSecret || !folder.trim()) return "";
 
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
+  const folderName = fullFolderPath(folder.trim()).replace(/"/g, '\\"');
+  const expression = `folder="${folderName}"`;
+
+  console.log("Cloudinary thumbnail lookup", {
+    folder: folder.trim(),
+    cloudName,
+    hasApiKey: Boolean(apiKey),
+    hasApiSecret: Boolean(apiSecret),
+    expression,
+  });
+
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -88,7 +135,7 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
         Authorization: "Basic " + Buffer.from(`${apiKey}:${apiSecret}`).toString("base64"),
       },
       body: JSON.stringify({
-        expression: `folder=${folder.trim()}`,
+        expression,
         sort_by: [{ created_at: "asc" }],
         max_results: 1,
         fields: ["secure_url"],
@@ -96,10 +143,22 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
       next: { revalidate: 300 },
     });
     if (!res.ok) {
-      console.error("Cloudinary thumbnail error:", res.status, await res.text());
+      const body = await res.text();
+      console.error("Cloudinary thumbnail lookup failed", {
+        folder: folder.trim(),
+        status: res.status,
+        body,
+      });
+      if (res.status === 401 || res.status === 403) {
+        return "";
+      }
       return "";
     }
     const json = await res.json();
+    console.log("Cloudinary thumbnail lookup result", {
+      folder: folder.trim(),
+      count: json.resources?.length ?? 0,
+    });
     const first = json.resources?.[0]?.secure_url as string | undefined;
     // Smaller transformation — these are grid thumbnails, not full-size.
     return first ? first.replace("/upload/", "/upload/q_auto,f_auto,w_800,c_limit/") : "";
@@ -164,7 +223,7 @@ export async function getCars(): Promise<Car[]> {
         price: r[6] ?? "",
         image: r[7] ?? "",
         images: undefined as string[] | undefined,
-        imagesFolder: r[16]?.trim() ?? "", // col Q — Cloudinary folder
+        imagesFolder: cleanFolderName(r[16]), // col Q — Cloudinary folder
         mileage: r[8] ?? "",
         engine: r[9] ?? "",
         transmission: r[10] ?? "",
@@ -214,7 +273,7 @@ export async function getParts(): Promise<Part[]> {
       price: r[4] ?? "",
       image: r[5] ?? "",
       images: undefined as string[] | undefined,
-      imagesFolder: r[6]?.trim() ?? "", // col G — Cloudinary folder
+      imagesFolder: cleanFolderName(r[6]), // col G — Cloudinary folder
     }));
 
   // Browse cards: prefer the first Cloudinary image, fall back to col F.
