@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = "i230508@isb.nu.edu.pk";
+const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
 
 type Payload = {
   type: "car" | "part";
