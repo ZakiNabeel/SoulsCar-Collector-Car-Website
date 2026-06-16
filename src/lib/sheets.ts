@@ -214,7 +214,7 @@ export async function getCars(): Promise<Car[]> {
     .map((r) => {
       const name = r[1] ?? "";
       const year = r[2] ?? "";
-      const slug = r[0] || (year ? toSlug(`${name}-${year}`) : toSlug(name));
+      const slug = toSlug(r[0] || (year ? `${name}-${year}` : name));
       if (seen.has(slug)) return null;
       seen.add(slug);
       return {
@@ -270,7 +270,7 @@ export async function getParts(): Promise<Part[]> {
   const parts = rows
     .filter((r) => r[1]?.trim())
     .map((r) => ({
-      slug: r[0] ?? "",
+      slug: toSlug(r[0] || r[1] || ""),
       name: r[1] ?? "",
       fits: r[2] ?? "",
       condition: (r[3] as Part["condition"]) ?? "Used",
