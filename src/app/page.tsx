@@ -16,7 +16,7 @@ export default async function Home() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="mx-auto max-w-7xl px-6 lg:px-10 pt-20 lg:pt-28 pb-20">
+      <section className="mx-auto max-w-7xl px-6 lg:px-10 pt-8 lg:pt-12 pb-20">
         <div className="grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5">
             <div className="eyebrow mb-6">SoulCars · Pakistan</div>

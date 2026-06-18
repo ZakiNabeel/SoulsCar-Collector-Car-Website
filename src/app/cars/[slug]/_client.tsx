@@ -241,6 +241,39 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
   const [imgIdx, setImgIdx] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [saved, toggleSaved] = useSaved(`car-${car.slug}`);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
+
+  const go = useCallback(
+    (dir: number) => {
+      if (gallery.length < 2) return;
+      setImgIdx((p) => (p + dir + gallery.length) % gallery.length);
+    },
+    [gallery.length],
+  );
+
+  // Preload adjacent images so swiping/clicking doesn't flash a blank frame.
+  useEffect(() => {
+    if (gallery.length < 2) return;
+    [(imgIdx + 1) % gallery.length, (imgIdx - 1 + gallery.length) % gallery.length].forEach((i) => {
+      const img = new window.Image();
+      img.src = gallery[i];
+    });
+  }, [imgIdx, gallery]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 40) go(touchDeltaX.current < 0 ? 1 : -1);
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
 
   const specs: [string, string][] = [
     ["Make", car.make],
@@ -264,12 +297,18 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
         <div className="grid lg:grid-cols-2 gap-10 items-start">
           {/* LEFT — image gallery */}
           <div className="relative bg-secondary">
-            <div className="aspect-[4/3] overflow-hidden bg-secondary">
+            <div
+              className="aspect-[4/3] overflow-hidden bg-secondary select-none touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               {gallery[imgIdx] && (
                 <img
                   src={gallery[imgIdx]}
                   alt={car.name}
-                  className="h-full w-full object-contain"
+                  draggable={false}
+                  className="h-full w-full object-contain transition-opacity duration-200"
                 />
               )}
             </div>
@@ -277,14 +316,14 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             {gallery.length > 1 && (
               <>
                 <button
-                  onClick={() => setImgIdx((p) => (p - 1 + gallery.length) % gallery.length)}
+                  onClick={() => go(-1)}
                   aria-label="Previous image"
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 grid place-items-center bg-background/90 border border-border hover:bg-foreground hover:text-background transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setImgIdx((p) => (p + 1) % gallery.length)}
+                  onClick={() => go(1)}
                   aria-label="Next image"
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 grid place-items-center bg-background/90 border border-border hover:bg-foreground hover:text-background transition-colors"
                 >

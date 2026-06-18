@@ -42,6 +42,28 @@ function fullFolderPath(folder: string): string {
   return `${CLOUDINARY_PARENT_FOLDER}/${folder}`;
 }
 
+// Extracts the bare filename (no folder, no extension) from a Cloudinary
+// public_id, e.g. "Website Inventory/C63 AMG/1" → "1".
+function fileNameFromPublicId(publicId: string | undefined): string {
+  if (!publicId) return "";
+  const last = publicId.split("/").pop() ?? "";
+  return last.replace(/\.[^.]+$/, "");
+}
+
+// Each Cloudinary folder is expected to contain an image named "1" that should
+// act as the cover/thumbnail. This orders resources so that image comes first,
+// falling back to created_at order (already applied by the API) for the rest.
+function sortCoverFirst<T extends { public_id?: string }>(resources: T[]): T[] {
+  return [...resources].sort((a, b) => {
+    const aCover = fileNameFromPublicId(a.public_id) === "1" ? 0 : 1;
+    const bCover = fileNameFromPublicId(b.public_id) === "1" ? 0 : 1;
+    return aCover - bCover;
+  });
+}
+
+const CLOUDINARY_THUMB_TRANSFORM = "/upload/q_auto,f_auto,w_800,c_limit/";
+const CLOUDINARY_GALLERY_TRANSFORM = "/upload/q_auto,f_auto,w_1600,c_limit/";
+
 // ─── Cloudinary folder → image URL list ──────────────────────────────────────
 // Uses the Cloudinary Admin API (search endpoint) with API Key + Secret.
 // Returns all image URLs inside a given folder, sorted by created_at.
@@ -77,7 +99,7 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
         expression,
         sort_by: [{ created_at: "asc" }],
         max_results: 30,
-        fields: ["secure_url"],
+        fields: ["secure_url", "public_id"],
       }),
       next: { revalidate: 300 },
     });
@@ -100,10 +122,12 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
       folder: folder.trim(),
       count: json.resources?.length ?? 0,
     });
-    // Inject Cloudinary transformations: auto quality, auto format, max width 1600px
-    return (json.resources ?? []).map((r: { secure_url: string }) =>
-      r.secure_url.replace("/upload/", "/upload/q_auto,f_auto,w_1600,c_limit/"),
+    // Put the image named "1" first (cover), then inject Cloudinary
+    // transformations: auto quality, auto format, max width 1600px.
+    const resources = sortCoverFirst(
+      (json.resources ?? []) as { secure_url: string; public_id?: string }[],
     );
+    return resources.map((r) => r.secure_url.replace("/upload/", CLOUDINARY_GALLERY_TRANSFORM));
   } catch (err) {
     console.error("Cloudinary fetch failed:", err);
     return [];
@@ -141,8 +165,10 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
       body: JSON.stringify({
         expression,
         sort_by: [{ created_at: "asc" }],
-        max_results: 1,
-        fields: ["secure_url"],
+        // Fetch a handful so we can locate the image named "1" (the cover),
+        // not just whichever was uploaded first.
+        max_results: 30,
+        fields: ["secure_url", "public_id"],
       }),
       next: { revalidate: 300 },
     });
@@ -163,9 +189,13 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
       folder: folder.trim(),
       count: json.resources?.length ?? 0,
     });
-    const first = json.resources?.[0]?.secure_url as string | undefined;
+    // Prefer the image named "1" as the cover; otherwise the first uploaded.
+    const resources = sortCoverFirst(
+      (json.resources ?? []) as { secure_url: string; public_id?: string }[],
+    );
+    const first = resources[0]?.secure_url as string | undefined;
     // Smaller transformation — these are grid thumbnails, not full-size.
-    return first ? first.replace("/upload/", "/upload/q_auto,f_auto,w_800,c_limit/") : "";
+    return first ? first.replace("/upload/", CLOUDINARY_THUMB_TRANSFORM) : "";
   } catch (err) {
     console.error("Cloudinary thumbnail fetch failed:", err);
     return "";

@@ -344,11 +344,30 @@ export function PartsClient({
       </div>
 
       <section className="mx-auto max-w-7xl w-full px-6 lg:px-10 py-16 flex-1">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
-          {filtered.map((p) => (
-            <PartCard key={p.slug} p={p} />
-          ))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-20">
+            <div className="eyebrow mb-4">No parts available</div>
+            <p className="font-serif text-2xl md:text-3xl max-w-xl">
+              Sorry, no car parts are available currently.
+            </p>
+            <p className="mt-4 text-muted-foreground max-w-md">
+              For more info, please reach out to us at{" "}
+              <a
+                href="mailto:hello@soulcars.pk"
+                className="text-foreground border-b border-foreground hover:text-accent hover:border-accent transition-colors"
+              >
+                hello@soulcars.pk
+              </a>
+              .
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+            {filtered.map((p) => (
+              <PartCard key={p.slug} p={p} />
+            ))}
+          </div>
+        )}
       </section>
 
       <SuggestedCarsCarousel cars={suggestedCars} />
