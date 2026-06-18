@@ -353,10 +353,10 @@ export function PartsClient({
             <p className="mt-4 text-muted-foreground max-w-md">
               For more info, please reach out to us at{" "}
               <a
-                href="mailto:hello@soulcars.pk"
+                href="mailto:soulcarspakistan@gmail.com"
                 className="text-foreground border-b border-foreground hover:text-accent hover:border-accent transition-colors"
               >
-                hello@soulcars.pk
+                soulcarspakistan@gmail.com
               </a>
               .
             </p>

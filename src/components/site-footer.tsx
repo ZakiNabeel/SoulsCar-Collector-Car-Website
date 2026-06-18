@@ -34,7 +34,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:hello@soulcars.pk" className="hover:text-foreground">
+                <a href="mailto:soulcarspakistan@gmail.com" className="hover:text-foreground">
                   Contact
                 </a>
               </li>
@@ -45,7 +45,9 @@ export function SiteFooter() {
           <p className="font-serif text-2xl text-foreground leading-snug">
             Find the car you were meant to drive.
           </p>
-          <p className="text-sm text-muted-foreground">hello@soulcars.pk · Lahore, Pakistan</p>
+          <p className="text-sm text-muted-foreground">
+            soulcarspakistan@gmail.com · Lahore, Pakistan
+          </p>
           <p className="text-xs text-muted-foreground pt-6">
             © {new Date().getFullYear()} SoulCars.pk
           </p>
