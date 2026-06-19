@@ -53,12 +53,19 @@ function fileNameFromPublicId(publicId: string | undefined): string {
 // Each Cloudinary folder is expected to contain an image named "1" that should
 // act as the cover/thumbnail. This orders resources so that image comes first,
 // falling back to created_at order (already applied by the API) for the rest.
-function sortCoverFirst<T extends { public_id?: string }>(resources: T[]): T[] {
-  return [...resources].sort((a, b) => {
-    const aCover = fileNameFromPublicId(a.public_id) === "1" ? 0 : 1;
-    const bCover = fileNameFromPublicId(b.public_id) === "1" ? 0 : 1;
-    return aCover - bCover;
-  });
+//
+// On accounts using "dynamic folders", the public_id is a random string
+// (e.g. "DSC_1367_kupb6f") and the original filename lives in `display_name`,
+// so we check that first and fall back to the public_id filename for
+// fixed-folder accounts where the name is the last public_id segment.
+function isCover<T extends { public_id?: string; display_name?: string }>(r: T): boolean {
+  return r.display_name === "1" || fileNameFromPublicId(r.public_id) === "1";
+}
+
+function sortCoverFirst<T extends { public_id?: string; display_name?: string }>(
+  resources: T[],
+): T[] {
+  return [...resources].sort((a, b) => (isCover(a) ? 0 : 1) - (isCover(b) ? 0 : 1));
 }
 
 const CLOUDINARY_THUMB_TRANSFORM = "/upload/q_auto,f_auto,w_800,c_limit/";
@@ -99,7 +106,7 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
         expression,
         sort_by: [{ created_at: "asc" }],
         max_results: 30,
-        fields: ["secure_url", "public_id"],
+        fields: ["secure_url", "public_id", "display_name"],
       }),
       next: { revalidate: 300 },
     });
@@ -125,7 +132,7 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
     // Put the image named "1" first (cover), then inject Cloudinary
     // transformations: auto quality, auto format, max width 1600px.
     const resources = sortCoverFirst(
-      (json.resources ?? []) as { secure_url: string; public_id?: string }[],
+      (json.resources ?? []) as { secure_url: string; public_id?: string; display_name?: string }[],
     );
     return resources.map((r) => r.secure_url.replace("/upload/", CLOUDINARY_GALLERY_TRANSFORM));
   } catch (err) {
@@ -168,7 +175,7 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
         // Fetch a handful so we can locate the image named "1" (the cover),
         // not just whichever was uploaded first.
         max_results: 30,
-        fields: ["secure_url", "public_id"],
+        fields: ["secure_url", "public_id", "display_name"],
       }),
       next: { revalidate: 300 },
     });
@@ -191,7 +198,7 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
     });
     // Prefer the image named "1" as the cover; otherwise the first uploaded.
     const resources = sortCoverFirst(
-      (json.resources ?? []) as { secure_url: string; public_id?: string }[],
+      (json.resources ?? []) as { secure_url: string; public_id?: string; display_name?: string }[],
     );
     const first = resources[0]?.secure_url as string | undefined;
     // Smaller transformation — these are grid thumbnails, not full-size.

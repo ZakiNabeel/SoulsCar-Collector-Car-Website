@@ -296,7 +296,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
       <section className="mx-auto max-w-7xl w-full px-6 lg:px-10 pt-10 pb-16">
         <div className="grid lg:grid-cols-2 gap-10 items-start">
           {/* LEFT — image gallery */}
-          <div className="relative bg-secondary min-w-0">
+          <div className="order-1 lg:order-none lg:col-start-1 lg:row-start-1 relative bg-secondary min-w-0">
             <div
               className="aspect-[4/3] overflow-hidden bg-secondary select-none touch-pan-y"
               onTouchStart={onTouchStart}
@@ -358,55 +358,60 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             )}
           </div>
 
-          {/* Description — sits under the gallery, left column */}
-          <div className="mt-6 lg:order-3 lg:mt-0 min-w-0">
-            <div className="eyebrow mb-3">About this car</div>
-            <p className="text-lg text-muted-foreground leading-relaxed">{car.description}</p>
+          {/*
+            On mobile (single column) the visual order is:
+              photos → title → Request to Buy → specs → description.
+            On lg+, the right column (title, price/actions, specs) sits beside the
+            gallery and the description sits under the gallery — rebuilt below with
+            explicit grid placement so the mobile `order-*` values don't apply.
+          */}
+
+          {/* Title */}
+          <div className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 min-w-0">
+            <div className="eyebrow">{car.location}</div>
+            <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
+              {car.year > 0 ? `${car.year} ` : ""}
+              {car.name}
+            </h1>
           </div>
 
-          {/* RIGHT — title, price, specs, actions */}
-          <div className="space-y-8 lg:row-span-2 min-w-0">
-            {/* Title */}
+          {/* Price + actions (Request to Buy) */}
+          <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 lg:self-start border border-border p-6 space-y-5 bg-background min-w-0">
             <div>
-              <div className="eyebrow">{car.location}</div>
-              <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
-                {car.year > 0 ? `${car.year} ` : ""}
-                {car.name}
-              </h1>
+              <div className="eyebrow">Asking price</div>
+              <p className="mt-1 font-serif text-4xl">{car.price || "Price on request"}</p>
             </div>
+            <div className="space-y-3">
+              <Button className="w-full" onClick={() => setShowModal(true)}>
+                Request to Buy
+              </Button>
+              <Button variant="outline" className="w-full" onClick={toggleSaved}>
+                {saved ? "Saved ✓" : "Save Listing"}
+              </Button>
+            </div>
+            <div className="pt-3 border-t border-border flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Seller</span>
+              <span>{car.seller}</span>
+            </div>
+          </div>
 
-            {/* Price + actions */}
-            <div className="border border-border p-6 space-y-5 bg-background">
-              <div>
-                <div className="eyebrow">Asking price</div>
-                <p className="mt-1 font-serif text-4xl">{car.price || "Price on request"}</p>
-              </div>
-              <div className="space-y-3">
-                <Button className="w-full" onClick={() => setShowModal(true)}>
-                  Request to Buy
-                </Button>
-                <Button variant="outline" className="w-full" onClick={toggleSaved}>
-                  {saved ? "Saved ✓" : "Save Listing"}
-                </Button>
-              </div>
-              <div className="pt-3 border-t border-border flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Seller</span>
-                <span>{car.seller}</span>
-              </div>
-            </div>
+          {/* Specs */}
+          <div className="order-4 lg:order-none lg:col-start-2 lg:row-start-3 min-w-0">
+            <div className="eyebrow mb-4">Specification</div>
+            <dl className="border-t border-border">
+              {specs.map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-border py-3">
+                  <dt className="text-sm text-muted-foreground shrink-0">{k}</dt>
+                  <dd className="text-sm text-right break-words min-w-0">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
-            {/* Specs */}
-            <div>
-              <div className="eyebrow mb-4">Specification</div>
-              <dl className="border-t border-border">
-                {specs.map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 border-b border-border py-3">
-                    <dt className="text-sm text-muted-foreground shrink-0">{k}</dt>
-                    <dd className="text-sm text-right break-words min-w-0">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+          {/* Description — under the gallery on lg, last on mobile */}
+          <div className="order-5 mt-6 lg:order-none lg:col-start-1 lg:row-start-2 lg:mt-0 min-w-0">
+            <div className="eyebrow mb-3">About this car</div>
+            <p className="text-lg text-muted-foreground leading-relaxed">{car.description}</p>
           </div>
         </div>
       </section>
