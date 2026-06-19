@@ -1,14 +1,15 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { FeaturedCarousel } from "@/components/featured-carousel";
+import { HeroSlideshow } from "@/components/hero-slideshow";
 import { LinkButton } from "@/components/ui-bits";
-import { getCars, getContent } from "@/lib/sheets";
+import { getCars, getContent, getHeroImages } from "@/lib/sheets";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
-  const [cars, content] = await Promise.all([getCars(), getContent()]);
+  const [cars, content, heroImages] = await Promise.all([getCars(), getContent(), getHeroImages()]);
   const c = content["home"] ?? {};
 
   return (
@@ -41,15 +42,22 @@ export default async function Home() {
             </div>
           </div>
           <div className="lg:col-span-7">
-            {/* Hidden on mobile — the lineup image only shows on desktop (lg+) */}
+            {/* Hidden on mobile — the hero visual only shows on desktop (lg+).
+                When the client has populated the Cloudinary "Hero" folder we
+                show the auto-rotating slideshow; otherwise we fall back to the
+                static cutout lineup so the hero is never empty. */}
             <div className="hidden lg:flex items-center justify-center">
-              <img
-                src="/assets/LandingPagePic-nobg.png"
-                alt="The SoulCars collection — a lineup of curated classic and collector cars"
-                width={2000}
-                height={1414}
-                className="w-full h-auto object-contain"
-              />
+              {heroImages.length > 0 ? (
+                <HeroSlideshow images={heroImages} />
+              ) : (
+                <img
+                  src="/assets/LandingPagePic-nobg.png"
+                  alt="The SoulCars collection — a lineup of curated classic and collector cars"
+                  width={2000}
+                  height={1414}
+                  className="w-full h-auto object-contain"
+                />
+              )}
             </div>
           </div>
         </div>

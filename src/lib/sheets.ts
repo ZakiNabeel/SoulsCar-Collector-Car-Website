@@ -238,6 +238,19 @@ async function resolveThumbnails<T extends { image: string; imagesFolder?: strin
   });
 }
 
+// ─── Hero slideshow images ───────────────────────────────────────────────────
+// Background-removed car images the client drops into a dedicated subfolder of
+// the Cloudinary parent (default "Hero"). The homepage hero crossfades through
+// them automatically; reordering/adding/removing in Cloudinary updates the site
+// on its own (within the 5-min Cloudinary cache window above). Falls back to []
+// when credentials are missing or the folder is empty — the hero then shows its
+// static fallback image instead.
+const CLOUDINARY_HERO_FOLDER = process.env.CLOUDINARY_HERO_FOLDER?.trim() || "Hero";
+
+export async function getHeroImages(): Promise<string[]> {
+  return getCloudinaryImages(CLOUDINARY_HERO_FOLDER);
+}
+
 // ─── Cars ────────────────────────────────────────────────────────────────────
 // Sheet columns A–Q:
 // A slug | B name | C year | D make | E model | F spec | G price | H image
