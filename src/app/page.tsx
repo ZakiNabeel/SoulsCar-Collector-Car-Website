@@ -41,9 +41,9 @@ export default async function Home() {
             </div>
           </div>
           <div className="lg:col-span-7">
-            <div className="overflow-hidden bg-secondary flex items-center justify-center">
+            <div className="flex items-center justify-center">
               <img
-                src="/assets/hero-car.jpg"
+                src="/assets/IMG-20260619-WA0017-removebg-preview.png"
                 alt="The SoulCars collection — a lineup of curated classic and collector cars"
                 width={1568}
                 height={426}
