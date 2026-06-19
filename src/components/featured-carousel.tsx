@@ -17,6 +17,8 @@ export function FeaturedCarousel({
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
 
   const startAutoPlay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -51,6 +53,24 @@ export function FeaturedCarousel({
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
   };
 
+  const prev = () => goTo((i - 1 + cars.length) % cars.length);
+  const next = () => goTo((i + 1) % cars.length);
+
+  // Swipe support for mobile, where the side cards / hover are unavailable.
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 40) (touchDeltaX.current < 0 ? next : prev)();
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
+
   return (
     <section className="bg-secondary py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -63,7 +83,12 @@ export function FeaturedCarousel({
 
         {/* Cards + centred nav buttons */}
         <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start touch-pan-y"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {[-1, 0, 1].map((off) => {
               const car = get(off);
               const isCenter = off === 0;
@@ -102,18 +127,46 @@ export function FeaturedCarousel({
             })}
           </div>
 
-          {/* Prev / Next — absolutely centred over the grid */}
+          {/* Prev / Next — absolutely centred over the grid (desktop only) */}
           <button
-            onClick={() => goTo((i - 1 + cars.length) % cars.length)}
+            onClick={prev}
             aria-label="Previous"
             className="hidden md:grid absolute left-0 top-[calc(50%-2.5rem)] -translate-x-1/2 -translate-y-1/2 h-11 w-11 place-items-center border border-border bg-background hover:bg-foreground hover:text-background transition-colors z-10"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
-            onClick={() => goTo((i + 1) % cars.length)}
+            onClick={next}
             aria-label="Next"
             className="hidden md:grid absolute right-0 top-[calc(50%-2.5rem)] translate-x-1/2 -translate-y-1/2 h-11 w-11 place-items-center border border-border bg-background hover:bg-foreground hover:text-background transition-colors z-10"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Mobile controls — buttons + dots below the single card */}
+        <div className="mt-6 flex items-center justify-center gap-4 md:hidden">
+          <button
+            onClick={prev}
+            aria-label="Previous"
+            className="grid h-11 w-11 place-items-center border border-border bg-background active:bg-foreground active:text-background transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="flex items-center gap-2">
+            {cars.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goTo(idx)}
+                aria-label={`Go to listing ${idx + 1}`}
+                className={`h-[3px] transition-all ${idx === i ? "w-8 bg-foreground" : "w-4 bg-foreground/30"}`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={next}
+            aria-label="Next"
+            className="grid h-11 w-11 place-items-center border border-border bg-background active:bg-foreground active:text-background transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

@@ -41,13 +41,13 @@ export default async function Home() {
             </div>
           </div>
           <div className="lg:col-span-7">
-            <div className="aspect-[16/10] overflow-hidden bg-secondary">
+            <div className="overflow-hidden bg-secondary flex items-center justify-center">
               <img
                 src="/assets/hero-car.jpg"
-                alt="1973 Porsche 911 in silver"
-                width={1920}
-                height={1080}
-                className="h-full w-full object-cover"
+                alt="The SoulCars collection — a lineup of curated classic and collector cars"
+                width={1568}
+                height={426}
+                className="w-full h-auto object-contain"
               />
             </div>
           </div>
