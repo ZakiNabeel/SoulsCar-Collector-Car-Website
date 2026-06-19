@@ -19,7 +19,7 @@ export default async function Home() {
       {/* Hero */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 pt-8 lg:pt-12 pb-20">
         <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-4">
             <div className="eyebrow mb-6">SoulCars · Pakistan</div>
             <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
               {c.hero_title ?? (
@@ -41,12 +41,14 @@ export default async function Home() {
               </LinkButton>
             </div>
           </div>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8">
             {/* Hidden on mobile — the hero visual only shows on desktop (lg+).
                 When the client has populated the Cloudinary "Hero" folder we
                 show the auto-rotating slideshow; otherwise we fall back to the
-                static cutout lineup so the hero is never empty. */}
-            <div className="hidden lg:flex items-center justify-center">
+                static cutout lineup so the hero is never empty.
+                Shifted right (justify-end + negative right margin) and given a
+                wider column so the cars read larger, per client request. */}
+            <div className="hidden lg:flex items-center justify-end lg:-mr-4 xl:-mr-10">
               {heroImages.length > 0 ? (
                 <HeroSlideshow images={heroImages} />
               ) : (
