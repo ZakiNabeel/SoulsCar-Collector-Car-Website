@@ -41,12 +41,13 @@ export default async function Home() {
             </div>
           </div>
           <div className="lg:col-span-7">
-            <div className="flex items-center justify-center">
+            {/* Hidden on mobile — the lineup image only shows on desktop (lg+) */}
+            <div className="hidden lg:flex items-center justify-center">
               <img
-                src="/assets/IMG-20260619-WA0017-removebg-preview.png"
+                src="/assets/LandingPagePic-nobg.png"
                 alt="The SoulCars collection — a lineup of curated classic and collector cars"
-                width={1568}
-                height={426}
+                width={2000}
+                height={1414}
                 className="w-full h-auto object-contain"
               />
             </div>
