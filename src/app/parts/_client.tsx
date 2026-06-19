@@ -236,7 +236,7 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
                   onMouseEnter={!isCenter ? () => handleSideHover(targetIdx) : undefined}
                   onMouseLeave={!isCenter ? handleSideLeave : undefined}
                   className={`group block bg-background transition-opacity duration-300 ${
-                    isCenter ? "opacity-100" : "hidden md:block opacity-50 hover:opacity-80"
+                    isCenter ? "opacity-100" : "hidden md:block opacity-100"
                   }`}
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-secondary">
