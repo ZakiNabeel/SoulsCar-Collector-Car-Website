@@ -361,55 +361,59 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
           {/*
             On mobile (single column) the visual order is:
               photos → title → Request to Buy → specs → description.
-            On lg+, the right column (title, price/actions, specs) sits beside the
-            gallery and the description sits under the gallery — rebuilt below with
-            explicit grid placement so the mobile `order-*` values don't apply.
+            On lg+, the title, Request-to-Buy box and specs are grouped into one
+            right-hand column that sits at the TOP beside the gallery (row-span-2),
+            so the price/actions are next to the image instead of being pushed
+            down by the image's height. The description sits under the gallery.
           */}
 
-          {/* Title */}
-          <div className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 min-w-0">
-            <div className="eyebrow">{car.location}</div>
-            <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
-              {car.year > 0 ? `${car.year} ` : ""}
-              {car.name}
-            </h1>
-          </div>
+          {/* Right column — title, price/actions, specs (top-aligned beside gallery) */}
+          <div className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2 min-w-0 space-y-8">
+            {/* Title */}
+            <div className="min-w-0">
+              <div className="eyebrow">{car.location}</div>
+              <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
+                {car.year > 0 ? `${car.year} ` : ""}
+                {car.name}
+              </h1>
+            </div>
 
-          {/* Price + actions (Request to Buy) */}
-          <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 lg:self-start border border-border p-6 space-y-5 bg-background min-w-0">
-            <div>
-              <div className="eyebrow">Asking price</div>
-              <p className="mt-1 font-serif text-4xl">{car.price || "Price on request"}</p>
+            {/* Price + actions (Request to Buy) */}
+            <div className="border border-border p-6 space-y-5 bg-background min-w-0">
+              <div>
+                <div className="eyebrow">Asking price</div>
+                <p className="mt-1 font-serif text-4xl">{car.price || "Price on request"}</p>
+              </div>
+              <div className="space-y-3">
+                <Button className="w-full" onClick={() => setShowModal(true)}>
+                  Request to Buy
+                </Button>
+                <Button variant="outline" className="w-full" onClick={toggleSaved}>
+                  {saved ? "Saved ✓" : "Save Listing"}
+                </Button>
+              </div>
+              <div className="pt-3 border-t border-border flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Seller</span>
+                <span>{car.seller}</span>
+              </div>
             </div>
-            <div className="space-y-3">
-              <Button className="w-full" onClick={() => setShowModal(true)}>
-                Request to Buy
-              </Button>
-              <Button variant="outline" className="w-full" onClick={toggleSaved}>
-                {saved ? "Saved ✓" : "Save Listing"}
-              </Button>
-            </div>
-            <div className="pt-3 border-t border-border flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Seller</span>
-              <span>{car.seller}</span>
-            </div>
-          </div>
 
-          {/* Specs */}
-          <div className="order-4 lg:order-none lg:col-start-2 lg:row-start-3 min-w-0">
-            <div className="eyebrow mb-4">Specification</div>
-            <dl className="border-t border-border">
-              {specs.map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 border-b border-border py-3">
-                  <dt className="text-sm text-muted-foreground shrink-0">{k}</dt>
-                  <dd className="text-sm text-right break-words min-w-0">{v}</dd>
-                </div>
-              ))}
-            </dl>
+            {/* Specs */}
+            <div className="min-w-0">
+              <div className="eyebrow mb-4">Specification</div>
+              <dl className="border-t border-border">
+                {specs.map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-4 border-b border-border py-3">
+                    <dt className="text-sm text-muted-foreground shrink-0">{k}</dt>
+                    <dd className="text-sm text-right break-words min-w-0">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
 
           {/* Description — under the gallery on lg, last on mobile */}
-          <div className="order-5 mt-6 lg:order-none lg:col-start-1 lg:row-start-2 lg:mt-0 min-w-0">
+          <div className="order-3 mt-6 lg:order-none lg:col-start-1 lg:row-start-2 lg:mt-0 min-w-0">
             <div className="eyebrow mb-3">About this car</div>
             <p className="text-lg text-muted-foreground leading-relaxed">{car.description}</p>
           </div>
