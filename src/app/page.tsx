@@ -43,10 +43,10 @@ export default async function Home() {
           <div className="lg:col-span-7">
             <div className="flex items-center justify-center">
               <img
-                src="/assets/Gemini_Generated_Image_dw4yu1dw4yu1dw4y.png"
+                src="/assets/IMG-20260619-WA0017-removebg-preview.png"
                 alt="The SoulCars collection — a lineup of curated classic and collector cars"
-                width={3964}
-                height={1088}
+                width={1568}
+                height={426}
                 className="w-full h-auto object-contain"
               />
             </div>
