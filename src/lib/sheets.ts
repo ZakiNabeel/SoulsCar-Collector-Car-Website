@@ -50,16 +50,20 @@ function fileNameFromPublicId(publicId: string | undefined): string {
   return last.replace(/\.[^.]+$/, "");
 }
 
-// Each Cloudinary folder is expected to contain an image named "1" that should
-// act as the cover/thumbnail. This orders resources so that image comes first,
-// falling back to created_at order (already applied by the API) for the rest.
+// Each Cloudinary folder is expected to contain a cover image — named "1" by
+// convention, though some folders use "Thumbnail" instead. This orders
+// resources so the cover comes first, falling back to created_at order
+// (already applied by the API) for the rest.
 //
 // On accounts using "dynamic folders", the public_id is a random string
 // (e.g. "DSC_1367_kupb6f") and the original filename lives in `display_name`,
 // so we check that first and fall back to the public_id filename for
 // fixed-folder accounts where the name is the last public_id segment.
+const COVER_NAMES = ["1", "thumbnail"];
+
 function isCover<T extends { public_id?: string; display_name?: string }>(r: T): boolean {
-  return r.display_name === "1" || fileNameFromPublicId(r.public_id) === "1";
+  const name = (r.display_name || fileNameFromPublicId(r.public_id)).trim().toLowerCase();
+  return COVER_NAMES.includes(name);
 }
 
 function sortCoverFirst<T extends { public_id?: string; display_name?: string }>(
@@ -105,7 +109,10 @@ async function getCloudinaryImages(folder: string): Promise<string[]> {
       body: JSON.stringify({
         expression,
         sort_by: [{ created_at: "asc" }],
-        max_results: 30,
+        // Fetch the whole folder (Cloudinary caps a page at 500). The detail
+        // gallery shows every image anyway, and a smaller window could exclude
+        // the cover named "1" when it wasn't uploaded among the first items.
+        max_results: 500,
         fields: ["secure_url", "public_id", "display_name"],
       }),
       next: { revalidate: 300 },
@@ -172,9 +179,10 @@ async function getCloudinaryThumbnail(folder: string): Promise<string> {
       body: JSON.stringify({
         expression,
         sort_by: [{ created_at: "asc" }],
-        // Fetch a handful so we can locate the image named "1" (the cover),
-        // not just whichever was uploaded first.
-        max_results: 30,
+        // Fetch the whole folder (Cloudinary caps a page at 500) so the cover
+        // named "1" is always in the result set — it isn't necessarily among
+        // the first-uploaded images, so a small window can miss it entirely.
+        max_results: 500,
         fields: ["secure_url", "public_id", "display_name"],
       }),
       next: { revalidate: 300 },
