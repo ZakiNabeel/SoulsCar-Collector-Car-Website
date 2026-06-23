@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
+// Must be an address on a domain verified in Resend, otherwise delivery is
+// restricted to the Resend account owner only. Falls back to the sandbox sender.
+const FROM_EMAIL = process.env.RESEND_FROM || "SoulCars <onboarding@resend.dev>";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -62,7 +65,7 @@ export async function POST(req: Request) {
 
   try {
     const result = await resend.emails.send({
-      from: "SoulCars Listings <onboarding@resend.dev>",
+      from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       replyTo: fields.email || undefined,
       subject: `New Listing: ${fields.year} ${fields.make} ${fields.model}`,
@@ -70,6 +73,13 @@ export async function POST(req: Request) {
       attachments,
     });
     console.log("Resend result:", JSON.stringify(result));
+    if (result.error) {
+      console.error("Resend returned an error:", result.error);
+      return NextResponse.json(
+        { ok: false, error: result.error.message || "Failed to send email" },
+        { status: 500 },
+      );
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Resend error:", err);
