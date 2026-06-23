@@ -7,6 +7,11 @@ const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
 // restricted to the Resend account owner only. Falls back to the sandbox sender.
 const FROM_EMAIL = process.env.RESEND_FROM || "SoulCars <onboarding@resend.dev>";
 
+// Only use the seller's email as replyTo if it's a valid address — a malformed
+// value makes Resend reject the whole send.
+const validReplyTo = (email?: string) =>
+  email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? email.trim() : undefined;
+
 export async function POST(req: Request) {
   const formData = await req.formData();
 
@@ -67,7 +72,7 @@ export async function POST(req: Request) {
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      replyTo: fields.email || undefined,
+      replyTo: validReplyTo(fields.email),
       subject: `New Listing: ${fields.year} ${fields.make} ${fields.model}`,
       html,
       attachments,
