@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         ["Name", data.name],
         ["Phone", data.phone],
         ...(data.email ? [["Email", data.email]] : []),
-        ...(data.itemUrl ? [["Listing URL", `<a href="${data.itemUrl}">${data.itemUrl}</a>`]] : []),
+        ...(data.itemUrl ? [["Listing URL", data.itemUrl]] : []),
       ]
         .map(
           ([k, v]) =>
