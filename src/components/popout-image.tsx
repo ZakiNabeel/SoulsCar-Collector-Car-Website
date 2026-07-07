@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ImageLightbox } from "./image-lightbox";
 
 interface PopoutImageProps {
@@ -13,7 +14,7 @@ interface PopoutImageProps {
   openOnClick?: boolean;
 }
 
-const HOVER_DELAY = 350;
+const HOVER_DELAY = 250;
 const CENTER_BAND_RATIO = 0.18; // fraction of viewport height counted as "centered"
 const THRESHOLDS = Array.from({ length: 21 }, (_, i) => i / 20);
 
@@ -26,31 +27,34 @@ export function PopoutImage({
   loading = "lazy",
   openOnClick = true,
 }: PopoutImageProps) {
-  const [open, setOpen] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
+  // Moderate hover preview — NOT the full-screen lightbox. The overlay is
+  // pointer-events-none, so the cursor keeps interacting with the source
+  // image underneath: leaving it closes the preview, clicks still work.
+  const [preview, setPreview] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const wasCentered = useRef(false);
-  const isFirstObservation = useRef(true);
 
   const gallery = images && images.length > 0 ? images : [src];
 
   const handleMouseEnter = () => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    hoverTimer.current = setTimeout(() => setOpen(true), HOVER_DELAY);
+    hoverTimer.current = setTimeout(() => setPreview(true), HOVER_DELAY);
   };
   const handleMouseLeave = () => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setPreview(false);
   };
   const handleClick = (e: React.MouseEvent) => {
     if (!openOnClick) return;
     e.preventDefault();
     e.stopPropagation();
-    setOpen(true);
+    setPreview(false);
+    setLightbox(true);
   };
 
-  // Mobile: pop out automatically once the image scrolls to the center of
-  // the viewport (only on the transition into view, not on initial mount —
-  // otherwise a hero image already centered on page load would pop instantly).
+  // Mobile (no hover): show the preview while the image sits near the center
+  // of the viewport, and put it back as soon as it scrolls out of the band.
   useEffect(() => {
     if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
     const el = imgRef.current;
@@ -63,19 +67,7 @@ export function PopoutImage({
         const elCenter = rect.top + rect.height / 2;
         const band = window.innerHeight * CENTER_BAND_RATIO;
         const isCentered = entry.isIntersecting && Math.abs(elCenter - viewportCenter) < band;
-
-        if (isFirstObservation.current) {
-          isFirstObservation.current = false;
-          wasCentered.current = isCentered;
-          return;
-        }
-
-        if (isCentered && !wasCentered.current) {
-          wasCentered.current = true;
-          setOpen(true);
-        } else if (!isCentered) {
-          wasCentered.current = false;
-        }
+        setPreview(isCentered);
       },
       { threshold: THRESHOLDS },
     );
@@ -97,8 +89,47 @@ export function PopoutImage({
         onClick={handleClick}
         className={className}
       />
-      {open && (
-        <ImageLightbox images={gallery} initialIndex={index} onClose={() => setOpen(false)} />
+      {preview &&
+        !lightbox &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-8 pointer-events-none bg-black/25 backdrop-blur-[2px] animate-preview-fade">
+            <img
+              src={src}
+              alt={alt}
+              draggable={false}
+              className="max-w-[min(72vw,760px)] max-h-[62vh] object-contain shadow-2xl animate-preview-pop"
+            />
+            <style jsx>{`
+              @keyframes preview-pop {
+                from {
+                  opacity: 0;
+                  transform: scale(0.92);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+              }
+              @keyframes preview-fade {
+                from {
+                  opacity: 0;
+                }
+                to {
+                  opacity: 1;
+                }
+              }
+              :global(.animate-preview-pop) {
+                animation: preview-pop 0.18s ease-out;
+              }
+              :global(.animate-preview-fade) {
+                animation: preview-fade 0.18s ease-out;
+              }
+            `}</style>
+          </div>,
+          document.body,
+        )}
+      {lightbox && (
+        <ImageLightbox images={gallery} initialIndex={index} onClose={() => setLightbox(false)} />
       )}
     </>
   );
