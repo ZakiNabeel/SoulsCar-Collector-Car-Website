@@ -1,4 +1,5 @@
 import type { Car, Part } from "./cars-data";
+import { parsePriceString } from "./currency";
 
 // ─── Content type ────────────────────────────────────────────────────────────
 export type SiteContent = Record<string, Record<string, string>>;
@@ -282,7 +283,8 @@ export async function getCars(): Promise<Car[]> {
         make: r[3] ?? "",
         model: r[4] ?? "",
         spec: r[5] ?? "",
-        price: r[6] ?? "",
+        price: parsePriceString(r[6] ?? ""),
+        priceDisplay: r[6] ?? "",
         image: r[7] ?? "",
         images: undefined as string[] | undefined,
         imagesFolder: cleanFolderName(r[16]), // col Q — Cloudinary folder
@@ -332,7 +334,8 @@ export async function getParts(): Promise<Part[]> {
       name: r[1] ?? "",
       fits: r[2] ?? "",
       condition: (r[3] as Part["condition"]) ?? "Used",
-      price: r[4] ?? "",
+      price: parsePriceString(r[4] ?? ""),
+      priceDisplay: r[4] ?? "",
       image: r[5] ?? "",
       images: undefined as string[] | undefined,
       imagesFolder: cleanFolderName(r[6]), // col G — Cloudinary folder

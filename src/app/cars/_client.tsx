@@ -35,13 +35,9 @@ export function CarsClient({
     Year: "All",
     Condition: "All",
   });
-
-  const priceValue = (price: string) => {
-    const n = parseFloat(price.replace(/[^0-9.]/g, ""));
-    if (price.includes("Cr")) return n * 10000000;
-    if (price.includes("L") || price.includes("Lac")) return n * 100000;
-    return n;
-  };
+  // New rows are appended at the bottom of the sheet, so "newly added" means
+  // reversing the sheet order to put the latest listings first.
+  const [newestFirst, setNewestFirst] = useState(false);
 
   const filtered = cars.filter((c) => {
     if (active.Make !== "All" && c.make !== active.Make) return false;
@@ -51,14 +47,16 @@ export function CarsClient({
       if (active.Year === "1970–1980" && (c.year < 1970 || c.year > 1980)) return false;
       if (active.Year === "1980+" && c.year < 1980) return false;
     }
-    if (active.Price !== "All") {
-      const p = priceValue(c.price);
+    if (active.Price !== "All" && !c.price.label) {
+      const p = c.price.amount;
       if (active.Price === "Under 1.5 Cr" && p >= 15000000) return false;
       if (active.Price === "1.5–3 Cr" && (p < 15000000 || p > 30000000)) return false;
       if (active.Price === "3 Cr+" && p < 30000000) return false;
     }
     return true;
   });
+
+  const sorted = newestFirst ? [...filtered].reverse() : filtered;
 
   return (
     <>
@@ -74,6 +72,13 @@ export function CarsClient({
 
       <div className="border-y border-border">
         <div className="mx-auto max-w-7xl px-6 lg:px-10 py-5 flex gap-3 overflow-x-auto">
+          <div className="flex gap-2 items-center">
+            <span className="eyebrow shrink-0">Sort</span>
+            <Pill active={newestFirst} onClick={() => setNewestFirst((v) => !v)}>
+              Newly Added
+            </Pill>
+            <span className="w-4" />
+          </div>
           {Object.entries(FILTERS).map(([group, opts]) => (
             <div key={group} className="flex gap-2 items-center">
               <span className="eyebrow shrink-0">{group}</span>
@@ -94,7 +99,7 @@ export function CarsClient({
 
       <section className="mx-auto max-w-7xl w-full px-6 lg:px-10 py-16 flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
-          {filtered.map((car) => (
+          {sorted.map((car) => (
             <CarCard key={car.slug} car={car} />
           ))}
         </div>

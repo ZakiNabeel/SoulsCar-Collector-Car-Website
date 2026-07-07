@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { Car } from "@/lib/cars-data";
+import { formatPrice } from "@/lib/currency";
+import { useCurrency } from "@/lib/currency-context";
+import { PopoutImage } from "@/components/popout-image";
 
 export function FeaturedCarousel({
   cars,
@@ -14,6 +17,7 @@ export function FeaturedCarousel({
   eyebrow?: string;
   heading?: string;
 }) {
+  const { currency } = useCurrency();
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,10 +109,11 @@ export function FeaturedCarousel({
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-secondary">
                     {car.image && (
-                      <img
+                      <PopoutImage
                         src={car.image}
                         alt={car.name}
                         loading="lazy"
+                        openOnClick={false}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     )}
@@ -118,7 +123,9 @@ export function FeaturedCarousel({
                       <h3 className="font-serif text-xl leading-snug">
                         {car.year} {car.name}
                       </h3>
-                      <span className="text-sm whitespace-nowrap">{car.price}</span>
+                      <span className="text-sm whitespace-nowrap">
+                        {formatPrice(car.price, currency)}
+                      </span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
                   </div>

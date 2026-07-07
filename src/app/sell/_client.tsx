@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui-bits";
+import { compressPhoto, fitPhotosToBudget } from "@/lib/compress-image";
 
 const STEPS = ["Car Details", "Photos & Condition", "Pricing & Contact"] as const;
 
@@ -57,19 +58,47 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [photos, setPhotos] = useState<File[]>([]);
+  const [photos, setPhotos] = useState<{ file: File; url: string }[]>([]);
   const [data, setData] = useState<FormData>(EMPTY);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Object URLs live outside render so previews aren't re-created every
+  // render (which leaked memory and froze mobile Safari with many photos).
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
+
+  useEffect(() => {
+    return () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.url));
+  }, []);
 
   const set =
     (k: keyof FormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setData((d) => ({ ...d, [k]: e.target.value }));
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    setPhotos((prev) => [...prev, ...Array.from(files)]);
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setProcessing(true);
+    setError("");
+    try {
+      // Phone photos are 3–8MB each; the server rejects large uploads, so
+      // shrink each one in the browser before it's ever sent.
+      const compressed = await Promise.all(Array.from(files).map(compressPhoto));
+      setPhotos((prev) => [
+        ...prev,
+        ...compressed.map((file) => ({ file, url: URL.createObjectURL(file) })),
+      ]);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos((prev) => {
+      URL.revokeObjectURL(prev[idx].url);
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -82,12 +111,29 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
     setSending(true);
     setError("");
     try {
+      const fitted = await fitPhotosToBudget(photos.map((p) => p.file));
+      if (!fitted) {
+        setError(
+          "Your photos are too large to upload together. Please remove a few and try again.",
+        );
+        return;
+      }
+
       const fd = new FormData();
       Object.entries(data).forEach(([k, v]) => fd.append(k, v));
-      photos.forEach((f) => fd.append("photos", f));
+      fitted.forEach((f) => fd.append("photos", f));
 
       const res = await fetch("/api/submit-listing", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("server error");
+      if (!res.ok) {
+        if (res.status === 413) {
+          setError(
+            "Your photos are too large to upload together. Please remove a few and try again.",
+          );
+          return;
+        }
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || "server error");
+      }
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again or email us directly.");
@@ -217,9 +263,14 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
                   accept="image/*"
                   multiple
                   className="hidden"
-                  onChange={(e) => handleFiles(e.target.files)}
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    handleFiles(files);
+                    // reset so picking the same file again re-triggers onChange
+                    e.target.value = "";
+                  }}
                 />
-                {photos.length === 0 ? (
+                {photos.length === 0 && !processing ? (
                   <p>
                     Drag photos here or <span className="underline">click to upload</span>
                     <br />
@@ -228,28 +279,44 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
                 ) : (
                   <div className="space-y-2">
                     <p className="text-foreground">
-                      {photos.length} photo{photos.length !== 1 ? "s" : ""} selected
+                      {processing
+                        ? "Preparing photos…"
+                        : `${photos.length} photo${photos.length !== 1 ? "s" : ""} selected`}
                     </p>
                     <div className="flex flex-wrap gap-2 justify-center mt-3">
-                      {photos.map((f, idx) => (
-                        <img
-                          key={idx}
-                          src={URL.createObjectURL(f)}
-                          alt={f.name}
-                          className="h-16 w-16 object-cover border border-border"
-                        />
+                      {photos.map((p, idx) => (
+                        <div key={p.url} className="relative">
+                          <img
+                            src={p.url}
+                            alt={p.file.name}
+                            className="h-16 w-16 object-cover border border-border"
+                          />
+                          <button
+                            type="button"
+                            aria-label="Remove photo"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removePhoto(idx);
+                            }}
+                            className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-foreground text-background text-xs leading-none flex items-center justify-center"
+                          >
+                            ×
+                          </button>
+                        </div>
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      className="text-xs underline mt-2"
-                    >
-                      Add more
-                    </button>
+                    {!processing && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        className="text-xs underline mt-2"
+                      >
+                        Add more
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -309,7 +376,7 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
             >
               ← Back
             </button>
-            <Button type="submit" disabled={sending}>
+            <Button type="submit" disabled={sending || processing}>
               {sending ? "Sending…" : step === STEPS.length - 1 ? "Submit listing" : "Continue"}
             </Button>
           </div>

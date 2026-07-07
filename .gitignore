@@ -40,3 +40,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# build artifacts
+tsconfig.tsbuildinfo

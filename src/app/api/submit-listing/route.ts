@@ -12,8 +12,24 @@ const FROM_EMAIL = process.env.RESEND_FROM || "SoulCars <onboarding@resend.dev>"
 const validReplyTo = (email?: string) =>
   email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? email.trim() : undefined;
 
+// Email sends with photo attachments can take a while on a cold function.
+export const maxDuration = 60;
+
+// Resend rejects emails over ~40MB; stay well under it so one oversized
+// upload can't sink the whole submission.
+const MAX_ATTACHMENT_BYTES = 30 * 1024 * 1024;
+
 export async function POST(req: Request) {
-  const formData = await req.formData();
+  let formData: FormData;
+  try {
+    formData = await req.formData();
+  } catch (err) {
+    console.error("Failed to parse listing form data:", err);
+    return NextResponse.json(
+      { ok: false, error: "Upload could not be read — photos may be too large." },
+      { status: 400 },
+    );
+  }
 
   const fields = {
     make: formData.get("make") as string,
@@ -33,10 +49,17 @@ export async function POST(req: Request) {
 
   const photoFiles = formData.getAll("photos") as File[];
   const attachments: { filename: string; content: Buffer }[] = [];
+  let attachmentBytes = 0;
+  let skippedPhotos = 0;
 
   for (const file of photoFiles) {
-    if (file.size === 0) continue;
+    if (!(file instanceof File) || file.size === 0) continue;
+    if (attachmentBytes + file.size > MAX_ATTACHMENT_BYTES) {
+      skippedPhotos++;
+      continue;
+    }
     const buffer = Buffer.from(await file.arrayBuffer());
+    attachmentBytes += file.size;
     attachments.push({ filename: file.name, content: buffer });
   }
 
@@ -65,19 +88,30 @@ export async function POST(req: Request) {
         .join("")}
     </table>
     ${fields.notes ? `<p style="margin-top:24px;font-family:sans-serif;font-size:14px"><strong>Notes:</strong><br>${fields.notes}</p>` : ""}
-    <p style="margin-top:24px;font-family:sans-serif;font-size:12px;color:#999">${attachments.length} photo(s) attached.</p>
+    <p style="margin-top:24px;font-family:sans-serif;font-size:12px;color:#999">${attachments.length} photo(s) attached.${skippedPhotos ? ` ${skippedPhotos} photo(s) were too large to attach — ask the seller to WhatsApp them.` : ""}</p>
   `;
 
+  const baseEmail = {
+    from: FROM_EMAIL,
+    to: ADMIN_EMAIL,
+    replyTo: validReplyTo(fields.email),
+    subject: `New Listing: ${fields.year} ${fields.make} ${fields.model}`,
+    html,
+  };
+
   try {
-    const result = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: ADMIN_EMAIL,
-      replyTo: validReplyTo(fields.email),
-      subject: `New Listing: ${fields.year} ${fields.make} ${fields.model}`,
-      html,
-      attachments,
-    });
+    let result = await resend.emails.send({ ...baseEmail, attachments });
     console.log("Resend result:", JSON.stringify(result));
+    if (result.error && attachments.length > 0) {
+      // Never lose the lead over the photos: if the send with attachments is
+      // rejected (size limits etc.), deliver the listing details alone.
+      console.error("Resend rejected send with attachments, retrying without:", result.error);
+      result = await resend.emails.send({
+        ...baseEmail,
+        html: `${html}<p style="font-family:sans-serif;font-size:12px;color:#c00">Photos could not be attached — ask the seller to WhatsApp them.</p>`,
+      });
+      console.log("Resend retry result:", JSON.stringify(result));
+    }
     if (result.error) {
       console.error("Resend returned an error:", result.error);
       return NextResponse.json(

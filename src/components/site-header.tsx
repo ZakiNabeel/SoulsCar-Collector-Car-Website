@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Menu, X } from "lucide-react";
+import { CurrencySelector } from "@/components/currency-selector";
 
 const nav = [
   { href: "/cars", label: "Cars" },
@@ -27,7 +28,7 @@ export function SiteHeader() {
           SoulCars<span className="text-accent">.pk</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-10">
+        <nav className="hidden md:flex items-center gap-6">
           {nav.map((n) => (
             <Link
               key={n.href}
@@ -37,6 +38,9 @@ export function SiteHeader() {
               {n.label}
             </Link>
           ))}
+          <div className="border-l border-border pl-6">
+            <CurrencySelector />
+          </div>
         </nav>
 
         <button

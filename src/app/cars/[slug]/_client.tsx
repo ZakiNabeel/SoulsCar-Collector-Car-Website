@@ -6,6 +6,9 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui-bits";
+import { PopoutImage } from "@/components/popout-image";
+import { formatPrice, type Currency } from "@/lib/currency";
+import { useCurrency } from "@/lib/currency-context";
 import type { Car } from "@/lib/cars-data";
 
 function useSaved(key: string) {
@@ -22,7 +25,15 @@ function useSaved(key: string) {
   return [saved, toggle] as const;
 }
 
-function RequestModal({ car, onClose }: { car: Car; onClose: () => void }) {
+function RequestModal({
+  car,
+  onClose,
+  currency,
+}: {
+  car: Car;
+  onClose: () => void;
+  currency: Currency;
+}) {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -39,7 +50,9 @@ function RequestModal({ car, onClose }: { car: Car; onClose: () => void }) {
         body: JSON.stringify({
           type: "car",
           itemName: `${car.year > 0 ? car.year + " " : ""}${car.name}`,
-          itemDetails: [car.make, car.model, car.price].filter(Boolean).join(" · "),
+          itemDetails: [car.make, car.model, formatPrice(car.price, currency)]
+            .filter(Boolean)
+            .join(" · "),
           itemUrl: window.location.href,
           name: form.name,
           phone: form.phone,
@@ -138,6 +151,7 @@ function RequestModal({ car, onClose }: { car: Car; onClose: () => void }) {
 }
 
 function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: string }) {
+  const { currency } = useCurrency();
   const suggestions = cars.filter((c) => c.slug !== currentSlug).slice(0, 6);
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -195,10 +209,11 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-secondary">
                     {car.image && (
-                      <img
+                      <PopoutImage
                         src={car.image}
                         alt={car.name}
                         loading="lazy"
+                        openOnClick={false}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     )}
@@ -208,7 +223,9 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
                       <h3 className="font-serif text-xl leading-snug">
                         {car.year} {car.name}
                       </h3>
-                      <span className="text-sm whitespace-nowrap">{car.price}</span>
+                      <span className="text-sm whitespace-nowrap">
+                        {formatPrice(car.price, currency)}
+                      </span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
                   </div>
@@ -237,6 +254,7 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
 }
 
 export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car[] }) {
+  const { currency } = useCurrency();
   const gallery = car.images && car.images.length > 0 ? car.images : [car.image].filter(Boolean);
   const [imgIdx, setImgIdx] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -290,7 +308,9 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
-      {showModal && <RequestModal car={car} onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <RequestModal car={car} onClose={() => setShowModal(false)} currency={currency} />
+      )}
 
       {/* ── Hero: image left, specs + price right ─────────────────────────── */}
       <section className="mx-auto max-w-7xl w-full px-6 lg:px-10 pt-10 pb-16">
@@ -298,16 +318,18 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
           {/* LEFT — image gallery */}
           <div className="order-1 lg:order-none lg:col-start-1 lg:row-start-1 relative bg-secondary min-w-0">
             <div
-              className="aspect-[4/3] overflow-hidden bg-secondary select-none touch-pan-y"
+              className="aspect-[4/3] overflow-hidden bg-secondary select-none touch-pan-y w-full cursor-zoom-in hover:opacity-90 transition-opacity"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
               {gallery[imgIdx] && (
-                <img
+                <PopoutImage
+                  key={imgIdx}
                   src={gallery[imgIdx]}
                   alt={car.name}
-                  draggable={false}
+                  images={gallery}
+                  index={imgIdx}
                   className="h-full w-full object-contain transition-opacity duration-200"
                 />
               )}
@@ -349,7 +371,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
                   <button
                     key={idx}
                     onClick={() => setImgIdx(idx)}
-                    className={`flex-shrink-0 w-20 h-14 overflow-hidden border-2 transition-colors ${idx === imgIdx ? "border-foreground" : "border-transparent"}`}
+                    className={`flex-shrink-0 w-20 h-14 overflow-hidden border-2 transition-colors hover:opacity-80 ${idx === imgIdx ? "border-foreground" : "border-transparent"}`}
                   >
                     <img src={src} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -382,7 +404,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             <div className="border border-border p-6 space-y-5 bg-background min-w-0">
               <div>
                 <div className="eyebrow">Asking price</div>
-                <p className="mt-1 font-serif text-4xl">{car.price || "Price on request"}</p>
+                <p className="mt-1 font-serif text-4xl">{formatPrice(car.price, currency)}</p>
               </div>
               <div className="space-y-3">
                 <Button className="w-full" onClick={() => setShowModal(true)}>

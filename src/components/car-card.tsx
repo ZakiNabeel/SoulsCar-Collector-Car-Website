@@ -1,19 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import type { Car } from "@/lib/cars-data";
+import { formatPrice } from "@/lib/currency";
+import { useCurrency } from "@/lib/currency-context";
+import { PopoutImage } from "@/components/popout-image";
 
 export function CarCard({ car }: { car: Car }) {
+  const { currency } = useCurrency();
+
   return (
     <Link href={`/cars/${car.slug}`} className="group block">
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
         {car.image && (
-          <img
+          <PopoutImage
             src={car.image}
             alt={car.year > 0 ? `${car.year} ${car.name}` : car.name}
             loading="lazy"
+            openOnClick={false}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
         )}
-        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-end justify-end p-4">
+        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-end justify-end p-4 pointer-events-none">
           <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-background tracking-wider">
             VIEW DETAILS →
           </span>
@@ -25,7 +33,9 @@ export function CarCard({ car }: { car: Car }) {
             {car.year > 0 ? `${car.year} ` : ""}
             {car.name}
           </h3>
-          <span className="text-sm text-foreground whitespace-nowrap">{car.price}</span>
+          <span className="text-sm text-foreground whitespace-nowrap">
+            {formatPrice(car.price, currency)}
+          </span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
       </div>

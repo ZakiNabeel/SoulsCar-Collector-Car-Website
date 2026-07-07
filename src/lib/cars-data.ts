@@ -1,3 +1,5 @@
+import type { Price } from "@/lib/currency";
+
 export type Car = {
   slug: string;
   name: string;
@@ -5,7 +7,8 @@ export type Car = {
   make: string;
   model: string;
   spec: string;
-  price: string;
+  price: Price;
+  priceDisplay: string;
   image: string;
   images?: string[]; // resolved Cloudinary image URLs for the gallery
   imagesFolder?: string; // Cloudinary folder name from col Q in the sheet
@@ -27,7 +30,8 @@ export const cars: Car[] = [
     make: "Porsche",
     model: "911 T",
     spec: "Flat-6 · Manual · 78,400 km",
-    price: "PKR 4.85 Cr",
+    price: { amount: 485000000, currency: "PKR" },
+    priceDisplay: "PKR 4.85 Cr",
     image: "/assets/car-1.jpg",
     mileage: "78,400 km",
     engine: "2.4L Flat-6",
@@ -46,7 +50,8 @@ export const cars: Car[] = [
     make: "Mercedes-Benz",
     model: "280 SL Pagoda",
     spec: "Inline-6 · Auto · 62,100 km",
-    price: "PKR 3.20 Cr",
+    price: { amount: 320000000, currency: "PKR" },
+    priceDisplay: "PKR 3.20 Cr",
     image: "/assets/car-1.jpg",
     mileage: "62,100 km",
     engine: "2.8L Inline-6",
@@ -65,7 +70,8 @@ export const cars: Car[] = [
     make: "Toyota",
     model: "FJ40",
     spec: "Inline-6 · Manual · 112,000 km",
-    price: "PKR 1.95 Cr",
+    price: { amount: 195000000, currency: "PKR" },
+    priceDisplay: "PKR 1.95 Cr",
     image: "/assets/car-2.jpg",
     mileage: "112,000 km",
     engine: "4.2L Inline-6",
@@ -84,7 +90,8 @@ export const cars: Car[] = [
     make: "Datsun",
     model: "Fairlady 1600",
     spec: "Inline-4 · Manual · 54,300 km",
-    price: "PKR 1.10 Cr",
+    price: { amount: 110000000, currency: "PKR" },
+    priceDisplay: "PKR 1.10 Cr",
     image: "/assets/car-3.jpg",
     mileage: "54,300 km",
     engine: "1.6L Inline-4",
@@ -103,7 +110,8 @@ export const cars: Car[] = [
     make: "BMW",
     model: "2002",
     spec: "Inline-4 · Manual · 96,800 km",
-    price: "PKR 1.45 Cr",
+    price: { amount: 145000000, currency: "PKR" },
+    priceDisplay: "PKR 1.45 Cr",
     image: "/assets/car-4.jpg",
     mileage: "96,800 km",
     engine: "2.0L Inline-4",
@@ -122,7 +130,8 @@ export const cars: Car[] = [
     make: "Jaguar",
     model: "E-Type Series II",
     spec: "Inline-6 · Manual · 71,200 km",
-    price: "PKR 5.60 Cr",
+    price: { amount: 560000000, currency: "PKR" },
+    priceDisplay: "PKR 5.60 Cr",
     image: "/assets/car-5.jpg",
     mileage: "71,200 km",
     engine: "4.2L Inline-6",
@@ -141,7 +150,8 @@ export type Part = {
   name: string;
   fits: string;
   condition: "New" | "Used" | "Restored";
-  price: string;
+  price: Price;
+  priceDisplay: string;
   image: string;
   images?: string[]; // resolved Cloudinary image URLs for a gallery
   imagesFolder?: string; // Cloudinary folder name from col G in the Parts sheet
@@ -153,7 +163,8 @@ export const parts: Part[] = [
     name: "FJ40 Chrome Hubcaps (set of 4)",
     fits: "Toyota Land Cruiser FJ40",
     condition: "Restored",
-    price: "PKR 85,000",
+    price: { amount: 85000, currency: "PKR" },
+    priceDisplay: "PKR 85,000",
     image: "/assets/part-1.jpg",
   },
   {
@@ -161,7 +172,8 @@ export const parts: Part[] = [
     name: "Early 911 Headlight Assembly",
     fits: "Porsche 911 (1965–73)",
     condition: "Used",
-    price: "PKR 142,000",
+    price: { amount: 142000, currency: "PKR" },
+    priceDisplay: "PKR 142,000",
     image: "/assets/part-2.jpg",
   },
   {
@@ -169,7 +181,8 @@ export const parts: Part[] = [
     name: "Nardi-style Wood Steering Wheel",
     fits: "Universal",
     condition: "New",
-    price: "PKR 38,500",
+    price: { amount: 38500, currency: "PKR" },
+    priceDisplay: "PKR 38,500",
     image: "/assets/part-3.jpg",
   },
   {
@@ -177,7 +190,8 @@ export const parts: Part[] = [
     name: "BMW 2002 Front Grille",
     fits: "BMW 2002 (1968–76)",
     condition: "Restored",
-    price: "PKR 52,000",
+    price: { amount: 52000, currency: "PKR" },
+    priceDisplay: "PKR 52,000",
     image: "/assets/part-1.jpg",
   },
   {
@@ -185,7 +199,8 @@ export const parts: Part[] = [
     name: "E-Type Bullet Mirror (pair)",
     fits: "Jaguar E-Type",
     condition: "New",
-    price: "PKR 24,800",
+    price: { amount: 24800, currency: "PKR" },
+    priceDisplay: "PKR 24,800",
     image: "/assets/part-2.jpg",
   },
   {
@@ -193,7 +208,8 @@ export const parts: Part[] = [
     name: "Pagoda Hood Emblem",
     fits: "Mercedes 280 SL",
     condition: "Used",
-    price: "PKR 18,000",
+    price: { amount: 18000, currency: "PKR" },
+    priceDisplay: "PKR 18,000",
     image: "/assets/part-3.jpg",
   },
 ];

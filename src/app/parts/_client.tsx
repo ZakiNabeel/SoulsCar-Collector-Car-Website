@@ -4,6 +4,9 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Pill, Button } from "@/components/ui-bits";
+import { formatPrice } from "@/lib/currency";
+import { useCurrency } from "@/lib/currency-context";
+import { PopoutImage } from "@/components/popout-image";
 import type { Part, Car } from "@/lib/cars-data";
 
 function useSaved(key: string) {
@@ -22,6 +25,7 @@ function useSaved(key: string) {
 }
 
 function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
+  const { currency } = useCurrency();
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +42,11 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
         body: JSON.stringify({
           type: "part",
           itemName: part.name,
-          itemDetails: [part.fits && `Fits ${part.fits}`, part.condition, part.price]
+          itemDetails: [
+            part.fits && `Fits ${part.fits}`,
+            part.condition,
+            formatPrice(part.price, currency),
+          ]
             .filter(Boolean)
             .join(" · "),
           name: form.name,
@@ -136,6 +144,7 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
 }
 
 function PartCard({ p }: { p: Part }) {
+  const { currency } = useCurrency();
   const [saved, toggleSaved] = useSaved(`part-${p.slug}`);
   const [showModal, setShowModal] = useState(false);
 
@@ -145,7 +154,7 @@ function PartCard({ p }: { p: Part }) {
       <div className="group block">
         <div className="aspect-[16/10] overflow-hidden bg-secondary">
           {p.image && (
-            <img
+            <PopoutImage
               src={p.image}
               alt={p.name}
               loading="lazy"
@@ -156,7 +165,7 @@ function PartCard({ p }: { p: Part }) {
         <div className="pt-5">
           <div className="flex items-baseline justify-between gap-4">
             <h3 className="font-serif text-xl">{p.name}</h3>
-            <span className="text-sm whitespace-nowrap">{p.price}</span>
+            <span className="text-sm whitespace-nowrap">{formatPrice(p.price, currency)}</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
             {p.fits && <span>Fits {p.fits}</span>}
@@ -181,6 +190,7 @@ function PartCard({ p }: { p: Part }) {
 }
 
 function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
+  const { currency } = useCurrency();
   const items = cars.slice(0, 6);
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -241,10 +251,11 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-secondary">
                     {car.image && (
-                      <img
+                      <PopoutImage
                         src={car.image}
                         alt={car.name}
                         loading="lazy"
+                        openOnClick={false}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     )}
@@ -254,7 +265,9 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
                       <h3 className="font-serif text-xl leading-snug">
                         {car.year} {car.name}
                       </h3>
-                      <span className="text-sm whitespace-nowrap">{car.price}</span>
+                      <span className="text-sm whitespace-nowrap">
+                        {formatPrice(car.price, currency)}
+                      </span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{car.spec}</p>
                   </div>
