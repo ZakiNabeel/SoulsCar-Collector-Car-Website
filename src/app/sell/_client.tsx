@@ -156,8 +156,14 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
             <span
               className={`h-3 w-3 rounded-full flex-shrink-0 ${i <= step ? "bg-foreground" : "bg-border"}`}
             />
+            {/* On phones only the current step's label fits — the others show
+                just their progress dot. */}
             <span
-              className={`text-sm tracking-wider uppercase ${i === step ? "text-foreground font-medium" : "text-muted-foreground"}`}
+              className={`text-sm tracking-wider uppercase ${
+                i === step
+                  ? "text-foreground font-medium"
+                  : "hidden sm:inline text-muted-foreground"
+              }`}
             >
               {label}
             </span>

@@ -34,38 +34,55 @@
 :root {
   --radius: 2px;
   /* SoulCars palette */
-  --background: oklch(1 0 0);                  /* #FFFFFF */
-  --foreground: oklch(0.18 0 0);               /* #1A1A1A */
+  --background: oklch(1 0 0); /* #FFFFFF */
+  --foreground: oklch(0.18 0 0); /* #1A1A1A */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0 0);
-  --primary: oklch(0.18 0 0);                  /* near black */
+  --primary: oklch(0.18 0 0); /* near black */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.965 0.005 80);          /* warm off-white #F7F5F2 */
+  --secondary: oklch(0.965 0.005 80); /* warm off-white #F7F5F2 */
   --secondary-foreground: oklch(0.18 0 0);
   --muted: oklch(0.965 0.005 80);
   --muted-foreground: oklch(0.45 0.01 250);
-  --accent: oklch(0.32 0.03 250);              /* deep slate #2E3A4E */
+  --accent: oklch(0.32 0.03 250); /* deep slate #2E3A4E */
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.91 0 0);                   /* #E5E5E5 */
+  --border: oklch(0.91 0 0); /* #E5E5E5 */
   --input: oklch(0.91 0 0);
   --ring: oklch(0.32 0.03 250);
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     line-height: 1.6;
+    /* Safety net: no stray element may cause sideways scrolling on phones.
+       `clip` (not `hidden`) so it doesn't create a new scroll container. */
+    overflow-x: clip;
   }
-  h1, h2, h3, h4, h5 { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em; line-height: 1.1; }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
   .eyebrow {
     font-family: var(--font-sans);
     font-size: 0.7rem;
@@ -73,5 +90,12 @@
     text-transform: uppercase;
     color: var(--color-muted-foreground);
   }
-  a, button { transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, opacity 200ms ease; }
+  a,
+  button {
+    transition:
+      color 200ms ease,
+      background-color 200ms ease,
+      border-color 200ms ease,
+      opacity 200ms ease;
+  }
 }

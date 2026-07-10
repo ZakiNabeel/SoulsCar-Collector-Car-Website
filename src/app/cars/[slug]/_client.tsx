@@ -71,7 +71,7 @@ function RequestModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/40 backdrop-blur-sm">
-      <div className="bg-background border border-border w-full max-w-md p-8 relative">
+      <div className="bg-background border border-border w-full max-w-md p-6 sm:p-8 relative max-h-[90dvh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
@@ -156,6 +156,8 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
 
   const startAutoPlay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -186,6 +188,27 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
   };
 
+  // Swipe support for mobile, where the side cards / hover are unavailable.
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 40) {
+      goTo(
+        touchDeltaX.current < 0
+          ? (i + 1) % suggestions.length
+          : (i - 1 + suggestions.length) % suggestions.length,
+      );
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
+
   return (
     <section className="bg-secondary py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -194,7 +217,12 @@ function SuggestedCarousel({ cars, currentSlug }: { cars: Car[]; currentSlug: st
           <h2 className="mt-3 font-serif text-3xl md:text-4xl">More from the collection</h2>
         </div>
         <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start touch-pan-y"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {[-1, 0, 1].map((off) => {
               const car = get(off);
               const isCenter = off === 0;
@@ -351,17 +379,24 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
-                {/* Dots */}
-                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-                  {gallery.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setImgIdx(idx)}
-                      aria-label={`Image ${idx + 1}`}
-                      className={`h-[3px] transition-all ${idx === imgIdx ? "w-8 bg-white" : "w-4 bg-white/40"}`}
-                    />
-                  ))}
-                </div>
+                {/* Dots for small galleries; a counter for large ones, where a
+                    dot per photo would overflow the image width on phones. */}
+                {gallery.length <= 8 ? (
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                    {gallery.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setImgIdx(idx)}
+                        aria-label={`Image ${idx + 1}`}
+                        className={`h-[3px] transition-all ${idx === imgIdx ? "w-8 bg-white" : "w-4 bg-white/40"}`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-white bg-black/50 px-2.5 py-1">
+                    {imgIdx + 1} / {gallery.length}
+                  </div>
+                )}
               </>
             )}
             {/* Thumbnail strip if multiple images */}
@@ -404,7 +439,9 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             <div className="border border-border p-6 space-y-5 bg-background min-w-0">
               <div>
                 <div className="eyebrow">Asking price</div>
-                <p className="mt-1 font-serif text-4xl">{formatPrice(car.price, currency)}</p>
+                <p className="mt-1 font-serif text-3xl sm:text-4xl break-words">
+                  {formatPrice(car.price, currency)}
+                </p>
               </div>
               <div className="space-y-3">
                 <Button className="w-full" onClick={() => setShowModal(true)}>

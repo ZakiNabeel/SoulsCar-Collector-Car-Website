@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ImageLightbox } from "./image-lightbox";
 
@@ -15,8 +15,6 @@ interface PopoutImageProps {
 }
 
 const HOVER_DELAY = 250;
-const CENTER_BAND_RATIO = 0.18; // fraction of viewport height counted as "centered"
-const THRESHOLDS = Array.from({ length: 21 }, (_, i) => i / 20);
 
 export function PopoutImage({
   src,
@@ -32,7 +30,6 @@ export function PopoutImage({
   // pointer-events-none, so the cursor keeps interacting with the source
   // image underneath: leaving it closes the preview, clicks still work.
   const [preview, setPreview] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const gallery = images && images.length > 0 ? images : [src];
@@ -53,33 +50,12 @@ export function PopoutImage({
     setLightbox(true);
   };
 
-  // Mobile (no hover): show the preview while the image sits near the center
-  // of the viewport, and put it back as soon as it scrolls out of the band.
-  useEffect(() => {
-    if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
-    const el = imgRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const rect = entry.boundingClientRect;
-        const viewportCenter = window.innerHeight / 2;
-        const elCenter = rect.top + rect.height / 2;
-        const band = window.innerHeight * CENTER_BAND_RATIO;
-        const isCentered = entry.isIntersecting && Math.abs(elCenter - viewportCenter) < band;
-        setPreview(isCentered);
-      },
-      { threshold: THRESHOLDS },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  // No preview on touch devices — a pop-out that hijacks scrolling feels
+  // unnatural on a phone. Tapping still opens the lightbox where enabled.
 
   return (
     <>
       <img
-        ref={imgRef}
         src={src}
         alt={alt}
         loading={loading}

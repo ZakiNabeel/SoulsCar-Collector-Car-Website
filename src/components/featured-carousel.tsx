@@ -160,7 +160,9 @@ export function FeaturedCarousel({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <div className="flex items-center gap-2">
+          {/* flex-wrap keeps a long dot row from pushing the page wider than
+              the phone screen when there are many listings */}
+          <div className="flex flex-wrap items-center justify-center gap-2 max-w-[55vw]">
             {cars.map((_, idx) => (
               <button
                 key={idx}

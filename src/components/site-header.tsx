@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Menu, X } from "lucide-react";
 import { CurrencySelector } from "@/components/currency-selector";
+import { useCurrency } from "@/lib/currency-context";
+import { CURRENCIES, type Currency } from "@/lib/currency";
 
 const nav = [
   { href: "/cars", label: "Cars" },
@@ -18,6 +20,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { currency, setCurrency } = useCurrency();
 
   useEffect(() => setMounted(true), []);
 
@@ -97,6 +100,27 @@ export function SiteHeader() {
                   </Link>
                 ))}
               </nav>
+
+              {/* Currency switcher — the desktop selector lives in the md+ nav,
+                  so without this row mobile users can't change currency. */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="eyebrow mb-3">Currency</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {(Object.keys(CURRENCIES) as Currency[]).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setCurrency(c)}
+                      className={`h-11 text-sm border transition-colors ${
+                        c === currency
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-background text-foreground border-border"
+                      }`}
+                    >
+                      {CURRENCIES[c].symbol} {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>,
           document.body,

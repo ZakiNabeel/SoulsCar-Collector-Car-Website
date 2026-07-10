@@ -119,8 +119,9 @@ export function ImageLightbox({ images, initialIndex = 0, onClose }: ImageLightb
           </div>
         )}
 
-        {/* Dots navigation (mobile) */}
-        {images.length > 1 && (
+        {/* Dots navigation (mobile) — only for small galleries; big ones rely
+            on the counter, since dozens of dots overflow a phone screen */}
+        {images.length > 1 && images.length <= 8 && (
           <div className="absolute bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
             {images.map((_, i) => (
               <button

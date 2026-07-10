@@ -21,7 +21,7 @@ export default async function Home() {
         <div className="grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5">
             <div className="eyebrow mb-6">SoulCars · Pakistan</div>
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground">
               {c.hero_title ?? (
                 <>
                   Collector Cars,

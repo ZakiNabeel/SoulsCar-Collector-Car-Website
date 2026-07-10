@@ -66,7 +66,7 @@ function EnquireModal({ part, onClose }: { part: Part; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/40 backdrop-blur-sm">
-      <div className="bg-background border border-border w-full max-w-md p-8 relative">
+      <div className="bg-background border border-border w-full max-w-md p-6 sm:p-8 relative max-h-[90dvh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
@@ -167,10 +167,10 @@ function PartCard({ p }: { p: Part }) {
             <h3 className="font-serif text-xl">{p.name}</h3>
             <span className="text-sm whitespace-nowrap">{formatPrice(p.price, currency)}</span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-            {p.fits && <span>Fits {p.fits}</span>}
+          <div className="mt-1 flex items-center justify-between gap-2 text-sm text-muted-foreground">
+            {p.fits && <span className="truncate min-w-0">Fits {p.fits}</span>}
             {p.condition && (
-              <span className="border border-border px-2 py-0.5 text-xs tracking-wider uppercase text-foreground">
+              <span className="shrink-0 whitespace-nowrap border border-border px-2 py-0.5 text-xs tracking-wider uppercase text-foreground">
                 {p.condition}
               </span>
             )}
@@ -195,6 +195,8 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
   const [i, setI] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
 
   const startAutoPlay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -225,6 +227,25 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
   };
 
+  // Swipe support for mobile, where the side cards / hover are unavailable.
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 40) {
+      goTo(
+        touchDeltaX.current < 0 ? (i + 1) % items.length : (i - 1 + items.length) % items.length,
+      );
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
+
   return (
     <section className="bg-secondary py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -234,7 +255,12 @@ function SuggestedCarsCarousel({ cars }: { cars: Car[] }) {
         </div>
 
         <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start touch-pan-y"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {[-1, 0, 1].map((off) => {
               const car = get(off);
               const isCenter = off === 0;
