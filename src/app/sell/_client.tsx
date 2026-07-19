@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui-bits";
+import { TermsGate } from "@/components/terms-gate";
 import { compressPhoto, fitPhotosToBudget } from "@/lib/compress-image";
 
 const STEPS = ["Car Details", "Photos & Condition", "Pricing & Contact"] as const;
@@ -55,6 +57,9 @@ const EMPTY: FormData = {
 
 export function SellClient({ content = {} }: { content?: Record<string, string> }) {
   const c = content;
+  const router = useRouter();
+  // Sellers must read and agree to the terms before the form is usable.
+  const [termsAgreed, setTermsAgreed] = useState(false);
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -144,6 +149,9 @@ export function SellClient({ content = {} }: { content?: Record<string, string> 
 
   return (
     <section className="mx-auto max-w-4xl w-full px-6 lg:px-10 pt-16 pb-24 flex-1">
+      {!termsAgreed && (
+        <TermsGate onAgree={() => setTermsAgreed(true)} onDecline={() => router.push("/")} />
+      )}
       <div className="eyebrow">{c.eyebrow ?? "List your car"}</div>
       <h1 className="mt-3 font-serif text-4xl md:text-5xl">{c.heading ?? "Tell us about it."}</h1>
       <p className="mt-4 text-lg text-muted-foreground">

@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui-bits";
 import { PopoutImage } from "@/components/popout-image";
+import { TermsGate } from "@/components/terms-gate";
 import { formatPrice, type Currency } from "@/lib/currency";
 import { useCurrency } from "@/lib/currency-context";
 import type { Car } from "@/lib/cars-data";
@@ -286,6 +287,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
   const gallery = car.images && car.images.length > 0 ? car.images : [car.image].filter(Boolean);
   const [imgIdx, setImgIdx] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [saved, toggleSaved] = useSaved(`car-${car.slug}`);
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
@@ -336,6 +338,15 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
+      {showTerms && (
+        <TermsGate
+          onAgree={() => {
+            setShowTerms(false);
+            setShowModal(true);
+          }}
+          onDecline={() => setShowTerms(false)}
+        />
+      )}
       {showModal && (
         <RequestModal car={car} onClose={() => setShowModal(false)} currency={currency} />
       )}
@@ -444,7 +455,7 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
                 </p>
               </div>
               <div className="space-y-3">
-                <Button className="w-full" onClick={() => setShowModal(true)}>
+                <Button className="w-full" onClick={() => setShowTerms(true)}>
                   Request to Buy
                 </Button>
                 <Button variant="outline" className="w-full" onClick={toggleSaved}>

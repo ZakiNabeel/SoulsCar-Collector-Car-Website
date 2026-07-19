@@ -8,7 +8,9 @@ async function fetchSheet(range: string): Promise<string[][]> {
   const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
   const SHEET_ID = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!API_KEY || !SHEET_ID || SHEET_ID === "your_sheet_id_here") return [];
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+  // Encode the range — tab names with spaces (e.g. 'Terms and Conditions')
+  // are invalid in a URL otherwise.
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
