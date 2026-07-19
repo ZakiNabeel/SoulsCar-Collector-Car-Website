@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { waMeLink } from "@/lib/whatsapp";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
@@ -63,6 +64,10 @@ export async function POST(req: Request) {
     attachments.push({ filename: file.name, content: buffer });
   }
 
+  const firstName = fields.name.trim().split(" ")[0] || "there";
+  const draftMessage = `Hi ${firstName}, thanks for listing your ${fields.year} ${fields.make} ${fields.model} on SoulCars.pk! This is Harris from SoulCars — happy to help with next steps.`;
+  const waLink = waMeLink(fields.phone, draftMessage);
+
   const html = `
     <h2 style="font-family:serif;margin-bottom:24px">New Car Listing — SoulCars.pk</h2>
     <table style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:14px">
@@ -89,6 +94,7 @@ export async function POST(req: Request) {
     </table>
     ${fields.notes ? `<p style="margin-top:24px;font-family:sans-serif;font-size:14px"><strong>Notes:</strong><br>${fields.notes}</p>` : ""}
     <p style="margin-top:24px;font-family:sans-serif;font-size:12px;color:#999">${attachments.length} photo(s) attached.${skippedPhotos ? ` ${skippedPhotos} photo(s) were too large to attach — ask the seller to WhatsApp them.` : ""}</p>
+    ${waLink ? `<p style="margin-top:24px"><a href="${waLink}" style="display:inline-block;background:#25D366;color:#fff;font-family:sans-serif;font-size:14px;padding:10px 20px;text-decoration:none;border-radius:4px">Message ${firstName} on WhatsApp</a></p>` : ""}
   `;
 
   const baseEmail = {

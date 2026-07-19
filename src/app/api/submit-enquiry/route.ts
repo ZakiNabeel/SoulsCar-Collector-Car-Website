@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { waMeLink } from "@/lib/whatsapp";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
@@ -32,6 +33,10 @@ export async function POST(req: Request) {
   const subject =
     data.type === "car" ? `Buy Request: ${data.itemName}` : `Part Enquiry: ${data.itemName}`;
 
+  const firstName = data.name.trim().split(" ")[0] || "there";
+  const draftMessage = `Hi ${firstName}, thanks for your interest in the ${data.itemName} on SoulCars.pk! This is Harris from SoulCars — happy to help with any questions.`;
+  const waLink = waMeLink(data.phone, draftMessage);
+
   const html = `
     <h2 style="font-family:serif;margin-bottom:24px">${heading}</h2>
     <table style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:14px">
@@ -51,6 +56,7 @@ export async function POST(req: Request) {
         .join("")}
     </table>
     ${data.message ? `<p style="margin-top:24px;font-family:sans-serif;font-size:14px"><strong>Message:</strong><br>${data.message}</p>` : ""}
+    ${waLink ? `<p style="margin-top:24px"><a href="${waLink}" style="display:inline-block;background:#25D366;color:#fff;font-family:sans-serif;font-size:14px;padding:10px 20px;text-decoration:none;border-radius:4px">Message ${data.name.split(" ")[0]} on WhatsApp</a></p>` : ""}
   `;
 
   try {
