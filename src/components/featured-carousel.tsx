@@ -160,18 +160,6 @@ export function FeaturedCarousel({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          {/* flex-wrap keeps a long dot row from pushing the page wider than
-              the phone screen when there are many listings */}
-          <div className="flex flex-wrap items-center justify-center gap-2 max-w-[55vw]">
-            {cars.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goTo(idx)}
-                aria-label={`Go to listing ${idx + 1}`}
-                className={`h-[3px] transition-all ${idx === i ? "w-8 bg-foreground" : "w-4 bg-foreground/30"}`}
-              />
-            ))}
-          </div>
           <button
             onClick={next}
             aria-label="Next"
