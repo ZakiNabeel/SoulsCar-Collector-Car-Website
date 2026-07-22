@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap"
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
         <WhatsAppFloat />
       </body>

@@ -255,10 +255,12 @@ export async function getHeroImages(): Promise<string[]> {
 }
 
 // ─── Cars ────────────────────────────────────────────────────────────────────
-// Sheet columns A–Q:
+// Sheet columns A–T:
 // A slug | B name | C year | D make | E model | F spec | G price | H image
 // I mileage | J engine | K transmission | L color | M condition | N location
 // O description | P seller | Q images_folder (Cloudinary folder name)
+// R featured (TRUE/FALSE) | S pinned (TRUE/FALSE, always shown first)
+// T category (`Collector` or `Daily Driver`, blank = Collector)
 function toSlug(text: string): string {
   return text
     .toLowerCase()
@@ -266,17 +268,31 @@ function toSlug(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function isChecked(value: string | undefined): boolean {
+  return ["true", "yes", "y", "1"].includes((value ?? "").trim().toLowerCase());
+}
+
 export async function getCars(): Promise<Car[]> {
-  const rows = await fetchSheet("Cars!A2:Q");
+  const rows = await fetchSheet("Cars!A2:T");
   const seen = new Set<string>();
 
   const cars = rows
-    .filter((r) => r[1]?.trim())
+    .filter((r) => r[0]?.trim())
     .map((r) => {
-      const name = r[1] ?? "";
+      // Fall back to Make + Model when the Name cell is left blank, so a
+      // missed data-entry field doesn't silently drop the whole listing.
+      const name = r[1]?.trim() || [r[3], r[4]].filter(Boolean).join(" ") || r[0];
       const year = r[2] ?? "";
-      const slug = toSlug(r[0] || (year ? `${name}-${year}` : name));
-      if (seen.has(slug)) return null;
+      const baseSlug = toSlug(r[0] || (year ? `${name}-${year}` : name));
+      // Two rows can end up with the same slug (e.g. a copy-pasted row that
+      // wasn't renamed). Since the slug is the page URL, give repeats a
+      // "-2", "-3"... suffix instead of silently dropping the listing.
+      let slug = baseSlug;
+      let suffix = 2;
+      while (seen.has(slug)) {
+        slug = `${baseSlug}-${suffix}`;
+        suffix++;
+      }
       seen.add(slug);
       return {
         slug,
@@ -298,9 +314,13 @@ export async function getCars(): Promise<Car[]> {
         location: r[13] ?? "",
         description: r[14] ?? "",
         seller: (r[15] as Car["seller"]) ?? "Private",
+        featured: isChecked(r[17]),
+        pinned: isChecked(r[18]),
+        category: (r[19]?.trim() === "Daily Driver"
+          ? "Daily Driver"
+          : "Collector") as Car["category"],
       };
-    })
-    .filter((c): c is NonNullable<typeof c> => c !== null);
+    });
 
   // Browse cards: prefer the first Cloudinary image, fall back to col H.
   return resolveThumbnails(cars);

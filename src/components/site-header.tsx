@@ -92,11 +92,16 @@ export function SiteHeader() {
                     key={n.href}
                     href={n.href}
                     onClick={() => setOpen(false)}
-                    className={`py-4 font-serif text-2xl ${
+                    className={`group -mx-6 flex items-center justify-between px-6 py-4 font-serif text-2xl transition-all duration-300 hover:bg-secondary ${
                       pathname === n.href ? "text-accent" : "text-foreground"
                     }`}
                   >
-                    {n.label}
+                    <span className="transition-transform duration-300 group-hover:translate-x-1.5">
+                      {n.label}
+                    </span>
+                    <span className="opacity-0 -translate-x-1 text-accent transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                      →
+                    </span>
                   </Link>
                 ))}
               </nav>
@@ -110,10 +115,10 @@ export function SiteHeader() {
                     <button
                       key={c}
                       onClick={() => setCurrency(c)}
-                      className={`h-11 text-sm border transition-colors ${
+                      className={`h-11 text-sm border transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg ${
                         c === currency
                           ? "bg-foreground text-background border-foreground"
-                          : "bg-background text-foreground border-border"
+                          : "bg-background text-foreground border-border hover:border-foreground hover:bg-secondary"
                       }`}
                     >
                       {CURRENCIES[c].symbol} {c}

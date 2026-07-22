@@ -440,10 +440,19 @@ export function CarDetailClient({ car, allCars = [] }: { car: Car; allCars?: Car
             {/* Title */}
             <div className="min-w-0">
               <div className="eyebrow">{car.location}</div>
-              <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
-                {car.year > 0 ? `${car.year} ` : ""}
-                {car.name}
-              </h1>
+              <div className="mt-2 flex items-center gap-3">
+                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight break-words">
+                  {car.year > 0 ? `${car.year} ` : ""}
+                  {car.name}
+                </h1>
+                {car.featured && (
+                  <img
+                    src="/assets/featured.png"
+                    alt="Featured"
+                    className="w-10 sm:w-12 shrink-0 -rotate-6"
+                  />
+                )}
+              </div>
             </div>
 
             {/* Price + actions (Request to Buy) */}

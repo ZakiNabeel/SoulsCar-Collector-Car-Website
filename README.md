@@ -102,7 +102,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 The spreadsheet is the entire CMS. It needs three tabs:
 
-### `Cars` tab — columns A to Q
+### `Cars` tab — columns A to T
 
 | Col | Field | Notes |
 |---|---|---|
@@ -123,6 +123,11 @@ The spreadsheet is the entire CMS. It needs three tabs:
 | O | description | Full description paragraph |
 | P | seller | `Verified` or `Private` |
 | Q | images_folder | Cloudinary folder name for multi-image gallery e.g. `1973-porsche-911` |
+| R | featured | `TRUE` to show a "Featured" ribbon on the listing (Cars page card + car detail page). Blank/`FALSE` = not featured. Does not affect the homepage carousel. |
+| S | pinned | `TRUE` to always keep this car near the top of its section on the Cars page, below featured cars. Blank/`FALSE` = normal position. |
+| T | category | `Daily Driver` to list the car under the "Daily Drivers" section instead of "Collector Cars". Blank = Collector. |
+
+On the Cars page, listings sort featured first, then pinned, then newest-added first (within each category). Two rows sharing the same slug get a `-2`, `-3`, etc. suffix appended automatically so both still get their own page.
 
 ### `Parts` tab — columns A to F
 

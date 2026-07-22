@@ -10,7 +10,14 @@ export function CarCard({ car }: { car: Car }) {
   const { currency } = useCurrency();
 
   return (
-    <Link href={`/cars/${car.slug}`} className="group block">
+    <Link href={`/cars/${car.slug}`} className="group block relative">
+      {car.featured && (
+        <img
+          src="/assets/featured.png"
+          alt="Featured"
+          className="absolute -top-4 -right-4 z-10 w-20 sm:w-24 rotate-12 pointer-events-none select-none drop-shadow-[0_8px_16px_rgba(220,38,38,0.45)] transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-[18deg]"
+        />
+      )}
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
         {car.image && (
           <PopoutImage
