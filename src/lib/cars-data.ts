@@ -35,4 +35,6 @@ export type Part = {
   image: string;
   images?: string[]; // resolved Cloudinary image URLs for a gallery
   imagesFolder?: string; // Cloudinary folder name from col G in the Parts sheet
+  description?: string;
+  location?: string;
 };

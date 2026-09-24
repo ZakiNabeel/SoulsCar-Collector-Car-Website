@@ -2,7 +2,6 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { waMeLink } from "@/lib/whatsapp";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
 // Must be an address on a domain verified in Resend, otherwise delivery is
 // restricted to the Resend account owner only. Falls back to the sandbox sender.
@@ -106,6 +105,7 @@ export async function POST(req: Request) {
   };
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     let result = await resend.emails.send({ ...baseEmail, attachments });
     console.log("Resend result:", JSON.stringify(result));
     if (result.error && attachments.length > 0) {

@@ -1,5 +1,7 @@
 import type { Car, Part } from "./cars-data";
 import { parsePriceString } from "./currency";
+import { cache } from "react";
+import { parsePartsRows } from "./parts-data";
 
 // ─── Content type ────────────────────────────────────────────────────────────
 export type SiteContent = Record<string, Record<string, string>>;
@@ -344,28 +346,28 @@ export async function getCarBySlug(slug: string): Promise<Car | undefined> {
 }
 
 // ─── Parts ───────────────────────────────────────────────────────────────────
-// Sheet columns A–G:
+// Sheet columns A–I:
 // A slug | B name | C fits | D condition | E price | F image
-// G images_folder (Cloudinary folder name)
-export async function getParts(): Promise<Part[]> {
-  const rows = await fetchSheet("Parts!A2:G");
-  const parts = rows
-    .filter((r) => r[1]?.trim())
-    .map((r) => ({
-      slug: toSlug(r[0] || r[1] || ""),
-      name: r[1] ?? "",
-      fits: r[2] ?? "",
-      condition: (r[3] as Part["condition"]) ?? "Used",
-      price: parsePriceString(r[4] ?? ""),
-      priceDisplay: r[4] ?? "",
-      image: r[5] ?? "",
-      images: undefined as string[] | undefined,
-      imagesFolder: cleanFolderName(r[6]), // col G — Cloudinary folder
-    }));
+// G images_folder (Cloudinary folder name) | H description | I location
+const getPartRows = cache(async (): Promise<Part[]> => {
+  return parsePartsRows(await fetchSheet("Parts!A2:I"));
+});
 
-  // Browse cards: prefer the first Cloudinary image, fall back to col F.
-  return resolveThumbnails(parts);
+export async function getParts(): Promise<Part[]> {
+  return resolveThumbnails(await getPartRows());
 }
+
+// Resolve only the selected part's gallery, not every folder in the inventory.
+export const getPartBySlug = cache(async (slug: string): Promise<Part | undefined> => {
+  const part = (await getPartRows()).find((item) => item.slug === slug);
+  if (!part) return undefined;
+  const images = part.imagesFolder ? await getCloudinaryImages(part.imagesFolder) : [];
+  return {
+    ...part,
+    image: images[0] || part.image,
+    images: images.length ? images : [part.image].filter(Boolean),
+  };
+});
 
 // ─── Content ─────────────────────────────────────────────────────────────────
 // Row 1  → headers: field_key | home | cars | parts | sell | about

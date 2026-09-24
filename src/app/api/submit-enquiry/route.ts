@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { waMeLink } from "@/lib/whatsapp";
+import { z } from "zod";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = "soulcarspakistan@gmail.com";
 // Must be an address on a domain verified in Resend, otherwise delivery is
 // restricted to the Resend account owner only. Falls back to the sandbox sender.
@@ -14,19 +14,41 @@ const FROM_EMAIL = process.env.RESEND_FROM || "SoulCars <onboarding@resend.dev>"
 const validReplyTo = (email?: string) =>
   email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? email.trim() : undefined;
 
-type Payload = {
-  type: "car" | "part";
-  itemName: string;
-  itemDetails?: string;
-  itemUrl?: string;
-  name: string;
-  phone: string;
-  email?: string;
-  message?: string;
-};
+const payloadSchema = z.object({
+  type: z.enum(["car", "part"]),
+  itemName: z.string().trim().min(1).max(300),
+  itemDetails: z.string().max(2000).optional(),
+  itemUrl: z
+    .string()
+    .url()
+    .max(2000)
+    .refine((url) => /^https?:\/\//i.test(url))
+    .optional(),
+  name: z.string().trim().min(1).max(120),
+  phone: z.string().trim().min(5).max(40),
+  email: z.union([z.string().trim().email().max(254), z.literal("")]).optional(),
+  message: z.string().max(5000).optional(),
+});
+
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!,
+  );
 
 export async function POST(req: Request) {
-  const data = (await req.json()) as Payload;
+  const parsed = payloadSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success)
+    return NextResponse.json(
+      { ok: false, error: "Please check your contact details." },
+      { status: 400 },
+    );
+  if (!process.env.RESEND_API_KEY)
+    return NextResponse.json(
+      { ok: false, error: "Enquiries are temporarily unavailable." },
+      { status: 503 },
+    );
+  const data = parsed.data;
 
   const heading =
     data.type === "car" ? "New Buy Request — SoulCars.pk" : "New Part Enquiry — SoulCars.pk";
@@ -51,15 +73,16 @@ export async function POST(req: Request) {
       ]
         .map(
           ([k, v]) =>
-            `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${k}</td><td style="padding:8px 12px;border-bottom:1px solid #eee">${v || "—"}</td></tr>`,
+            `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${k}</td><td style="padding:8px 12px;border-bottom:1px solid #eee">${escapeHtml(v || "—")}</td></tr>`,
         )
         .join("")}
     </table>
-    ${data.message ? `<p style="margin-top:24px;font-family:sans-serif;font-size:14px"><strong>Message:</strong><br>${data.message}</p>` : ""}
-    ${waLink ? `<p style="margin-top:24px"><a href="${waLink}" style="display:inline-block;background:#25D366;color:#fff;font-family:sans-serif;font-size:14px;padding:10px 20px;text-decoration:none;border-radius:4px">Message ${data.name.split(" ")[0]} on WhatsApp</a></p>` : ""}
+    ${data.message ? `<p style="margin-top:24px;font-family:sans-serif;font-size:14px"><strong>Message:</strong><br>${escapeHtml(data.message)}</p>` : ""}
+    ${waLink ? `<p style="margin-top:24px"><a href="${waLink}" style="display:inline-block;background:#25D366;color:#fff;font-family:sans-serif;font-size:14px;padding:10px 20px;text-decoration:none;border-radius:4px">Message ${escapeHtml(firstName)} on WhatsApp</a></p>` : ""}
   `;
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,

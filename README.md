@@ -129,7 +129,9 @@ The spreadsheet is the entire CMS. It needs three tabs:
 
 On the Cars page, listings sort featured first, then pinned, then newest-added first (within each category). Two rows sharing the same slug get a `-2`, `-3`, etc. suffix appended automatically so both still get their own page.
 
-### `Parts` tab — columns A to F
+### `Parts` tab — columns A to I
+
+Parts use the same backend as cars, with individual detail pages, Cloudinary galleries and email enquiries. See [the parts setup guide](docs/parts-setup.md) for the client workflow and an importable header template.
 
 | Col | Field |
 |---|---|
@@ -139,6 +141,9 @@ On the Cars page, listings sort featured first, then pinned, then newest-added f
 | D | condition (`New`, `Used`, or `Restored`) |
 | E | price |
 | F | image |
+| G | images_folder (Cloudinary subfolder) |
+| H | description (optional) |
+| I | location (optional) |
 
 ### `Content` tab — editable page text
 
